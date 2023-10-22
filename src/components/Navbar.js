@@ -9,6 +9,7 @@ import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/react/24/outline'
 const navigation = [
   { name: 'Feed', href: '/', current: false },
   { name: 'Profile', href: '/profile', current: false },
+  { name: 'Post a Job', href: '/postjob', current: false },
   { name: 'Test', href: '#', current: false },
   { name: 'Test', href: '#', current: false },
 ]
@@ -132,7 +133,7 @@ const Navbar = () => {
                       </Menu.Item>
                     </Menu.Items>
                   </Transition>
-                </Menu>
+                </Menu><p className="text-white pl-5 rounded-md text-sm font-medium">{currentUser.username}</p>
   </> : <>
   <Menu as="div" className="relative ml-3">
                   <div>
