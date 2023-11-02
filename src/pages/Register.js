@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-//import logo from "../assets/LogoGeoMemoirs.png";
 import _axios from "../api/_axios";
 
 function Register() {
@@ -31,82 +30,79 @@ function Register() {
   console.log(inputs);
 
   return (
-    <div className="relative flex flex-col justify-center min-h-screen overflow-hidden">
+    <div className="relative flex flex-col justify-center items-center min-h-screen overflow-hidden bg-gray-800">
       <div className="bg-image w-full h-full"></div>
-      {/*<div className="justify-center text-center flex"><img className="w-72 h-72" src={logo}/></div> */}
-      <div className="w-full p-6 m-auto bg-white rounded-md shadow-xl lg:max-w-xl">
-        <h1
-          className="text-3xl font-semibold text-center uppercase"
-          style={{ color: "#7d7059" }}
-        >
-          Sign Up
+      {/* <div className="justify-center text-center flex"><img className="w-72 h-72" src={logo}/></div> */}
+      <div className="w-full p-6 m-auto bg-white rounded-md shadow-xl lg:max-w-xl flex flex-col items-center">
+        <h1 className="text-3xl font-semibold text-center uppercase text-blue-950">
+          Register
         </h1>
-        <form className="mt-6" onSubmit={submit}>
-        <div className="mb-2">
-          <label
-            htmlFor="type"
-            className="block text-sm font-semibold text-gray-800"
-          >
-            Type
-          </label>
-          <select
-            required // use a <select> element instead of <input> for gender
-            name="type"
-            className="block w-full px-4 py-2 mt-2 text-slate-700 bg-white border rounded-md focus:border-slate-700 focus:ring-slate-700 focus:outline-none focus:ring focus:ring-opacity-40"
-            onChange={handleChange}
-          >
-            <option value="employee">Employee</option>
-            <option value="employer">Employer</option>
-          </select>
-        </div>
-          <div className="mb-2">
+        <form className="mt-6 w-2/3" onSubmit={submit}>
+          <div className="mb-2 w-full">
+            <label
+              htmlFor="type"
+              className="block text-sm font-semibold text-gray-800"
+            >
+              Type
+            </label>
+            <select
+              required // use a <select> element instead of <input> for gender
+              name="type"
+              className="w-full px-4 py-2 mt-2 text-blue-950 bg-white border rounded-md focus:border-blue-950 focus:ring-blue-950 focus:outline-none focus:ring focus:ring-opacity-40"
+              onChange={handleChange}
+            >
+              <option value="employee">Job Seeker</option>
+              <option value="employer">Employer</option>
+            </select>
+          </div>
+          <div className="mb-2 w-full">
             <label
               for="username"
-              className="block text-sm font-semibold text-gray-800"
+              className="block text-sm font-semibold text-blue-950"
             >
               Username
             </label>
             <input
               required
               type="text"
-              className="block w-full px-4 py-2 mt-2 text-orange-300 bg-white border rounded-md focus:border-orange-200 focus:ring-orange-100 focus:outline-none focus:ring focus:ring-opacity-40"
+              className="w-full px-4 py-2 mt-2 text-blue-950 bg-white border rounded-md focus:border-blue-950 focus:ring-blue-950 focus:outline-none focus:ring focus:ring-opacity-40"
               name="username"
               onChange={handleChange}
             />
           </div>
-          <div className="mb-2">
+          <div className="mb-2 w-full">
             <label
               for="email"
-              className="block text-sm font-semibold text-gray-800"
+              className="block text-sm font-semibold text-blue-950"
             >
               Email
             </label>
             <input
               required
               type="text"
-              className="block w-full px-4 py-2 mt-2 text-orange-300 bg-white border rounded-md focus:border-orange-200 focus:ring-orange-100 focus:outline-none focus:ring focus:ring-opacity-40"
+              className="w-full px-4 py-2 mt-2 text-blue-950 bg-white border rounded-md focus:border-blue-950 focus:ring-blue-950 focus:outline-none focus:ring focus:ring-opacity-40"
               name="email"
               onChange={handleChange}
             />
           </div>
-          <div className="mb-2">
+          <div className="mb-2 w-full">
             <label
               for="password"
-              className="block text-sm font-semibold text-gray-800"
+              className="block text-sm font-semibold text-blue-950"
             >
               Password
             </label>
             <input
               required
               type="password"
-              className="block w-full px-4 py-2 mt-2 text-orange-300 bg-white border rounded-md focus:border-orange-200 focus:ring-orange-100 focus:outline-none focus:ring focus:ring-opacity-40"
+              className="w-full px-4 py-2 mt-2 text-blue-950 bg-white border rounded-md focus:border-blue-950 focus:ring-blue-950 focus:outline-none focus:ring focus:ring-opacity-40"
               name="password"
               onChange={handleChange}
             />
           </div>
           {err && <p>{err}</p>}
           <div className="mt-6">
-            <button className="w-full px-4 py-2 tracking-wide bg-orange-200 text-white transition-colors duration-200 transform submit-btn rounded-md hover:bg-orange-100 focus:outline-none focus:bg-purple-600">
+            <button className="w-full px-4 py-2 tracking-wide bg-blue-950 text-white transition-colors duration-200 transform submit-btn rounded-md hover:bg-blue-600 focus:outline-none focus:bg-blue-300">
               Register
             </button>
           </div>
@@ -116,9 +112,8 @@ function Register() {
           {" "}
           Already have an account?{" "}
           <Link
-            to={"/signin"}
-            className="font-medium hover:underline"
-            style={{ color: "#D1345B" }}
+            to={"/login"}
+            className="font-medium hover:underline text-blue-950"
           >
             Sign in
           </Link>
