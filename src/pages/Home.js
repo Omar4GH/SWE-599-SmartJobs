@@ -1,7 +1,4 @@
 import React from "react";
-import Card from '@mui/joy/Card';
-import CardContent from '@mui/joy/CardContent';
-import Skeleton from '@mui/joy/Skeleton';
 
 const Home = () => {
   return (
@@ -13,5 +10,4 @@ const Home = () => {
 
   );
 };
-
 export default Home;
