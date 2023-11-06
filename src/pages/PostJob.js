@@ -57,7 +57,7 @@ const PostJob = () => {
   
     // For the "tags" field, split the comma-separated values into an array
     if (name === "tags") {
-      const tagsArray = value.split(" ").map((tag) => tag.trim());
+      const tagsArray = value.split(",").map((tag) => tag.trim());
       setFormData({
         ...formData,
         [name]: tagsArray,
