@@ -4,15 +4,25 @@ import CardContent from "@mui/joy/CardContent";
 import Skeleton from "@mui/joy/Skeleton";
 import Typography from "@mui/material/Typography";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
-import { Avatar, Chip } from "@mui/material";
+import {
+  Avatar,
+  Chip,
+  FormControl,
+  InputLabel,
+  NativeSelect,
+} from "@mui/material";
 import _axios from "../api/_axios";
 import moment from "moment";
 import ThumbUpOffAlt from "@mui/icons-material/ThumbUpOffAlt";
 import ThumbUpIcon from "@mui/icons-material/ThumbUp";
 import CircularProgress from "@mui/material/CircularProgress";
+import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
+import BookmarkIcon from "@mui/icons-material/Bookmark";
 
 const Feed = () => {
   const [jobs, setJobs] = useState(null);
+  const [liked, setLiked] = useState(false);
+  const [saved, setSaved] = useState(false);
 
   const fetchData = async () => {
     try {
@@ -36,9 +46,113 @@ const Feed = () => {
     fetchData();
   }, []);
 
+  const like = () => {
+    setLiked(!liked);
+  };
+  const save = () => {
+    setSaved(!saved);
+  };
+
   return (
-    <div className="flex flex-col items-center h-screen">
+    <div className="flex flex-col items-center h-full">
       <div className="text-2xl mb-4"></div>
+
+      <Card
+        variant="outlined"
+        sx={{
+          width: "max(400px, 60%)",
+          borderRadius: "16px", // Adjust the value for the desired border radius
+          boxShadow: "0px 4px 4px rgba(0, 0, 0, 0.25)", // Add shadow properties
+        }}
+        className="w-full max-w-xl mb-4 elevation-2" // Use elevation-2 for the desired elevation level
+      >
+        {saved ? (
+          <>
+            {" "}
+            <BookmarkIcon
+              fontSize="large"
+              className="absolute right-0 top-10 cursor-pointer"
+              onClick={save}
+            />
+          </>
+        ) : (
+          <>
+            <BookmarkBorderIcon
+              fontSize="large"
+              className="absolute right-0 top-10 cursor-pointer"
+              onClick={save}
+            />
+          </>
+        )}
+
+        {liked ? (
+          <div className="absolute right-10 top-10 cursor-pointer">
+            5
+            <ThumbUpIcon fontSize="large" className="" onClick={like} />
+          </div>
+        ) : (
+          <div className="absolute right-10 top-10 cursor-pointer">
+            0 <ThumbUpOffAlt fontSize="large" className="" onClick={like} />
+          </div>
+        )}
+
+        <div className="flex justify-between">
+          <span className="text-xs text-gray-500">
+            <LocationOnIcon fontSize="small" />
+            Turkey
+          </span>
+          <span className="text-xs text-gray-500">10 mins ago</span>
+        </div>
+
+        <div className="flex items-center">
+          <Avatar
+            src="https://media.istockphoto.com/id/1300845620/vector/user-icon-flat-isolated-on-white-background-user-symbol-vector-illustration.jpg?s=612x612&w=0&k=20&c=yBeyba0hUkh14_jgv1OKqIH0CCSWU_4ckRkAoy2p73o="
+            sx={{ width: 75, height: 75 }}
+          />
+          <span className="text-gray-700 text-sm">Omar Gh</span>
+        </div>
+
+        <CardContent orientation="horizontal">
+          <Typography variant="h5" gutterBottom>
+            Junior Software Engineer
+          </Typography>
+        </CardContent>
+        <div className="text-sm text-gray-600 ">Junior developer</div>
+        <CardContent sx={{ gap: 0.5, mt: 1 }}>
+          <Typography variant="body1" gutterBottom>
+            Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem
+            Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum
+          </Typography>
+        </CardContent>
+        <div>
+          <Chip
+            className="w-fit feed-chip mt-2 mr-2"
+            label="TEST"
+            size="small"
+          />
+          <Chip
+            className="w-fit feed-chip mt-2 mr-2"
+            label="TAG"
+            size="small"
+          />
+        </div>
+        <FormControl className="w-1/4 absolute cursor-pointer">
+          <InputLabel variant="standard" htmlFor="uncontrolled-native">
+            Mark
+          </InputLabel>
+          <NativeSelect
+            defaultValue={30}
+            inputProps={{
+              name: "mark",
+              id: "uncontrolled-native",
+            }}
+          >
+            <option value=""></option>
+            <option value="Applied">Applied</option>
+            <option value="Want to Apply">Want to Apply</option>
+          </NativeSelect>
+        </FormControl>
+      </Card>
 
       {jobs ? (
         <>
@@ -53,6 +167,41 @@ const Feed = () => {
                 }}
                 className="w-full max-w-xl mb-4 elevation-2" // Use elevation-2 for the desired elevation level
               >
+                {saved ? (
+                  <>
+                    {" "}
+                    <BookmarkIcon
+                      fontSize="large"
+                      className="absolute right-0 top-10 cursor-pointer"
+                      onClick={save}
+                    />
+                  </>
+                ) : (
+                  <>
+                    <BookmarkBorderIcon
+                      fontSize="large"
+                      className="absolute right-0 top-10 cursor-pointer"
+                      onClick={save}
+                    />
+                  </>
+                )}
+
+                {liked ? (
+                  <div className="absolute right-10 top-10 cursor-pointer">
+                    {job.likes.length - 1}
+                    <ThumbUpIcon fontSize="large" className="" onClick={like} />
+                  </div>
+                ) : (
+                  <div className="absolute right-10 top-10 cursor-pointer">
+                    {job.likes.length - 1}{" "}
+                    <ThumbUpOffAlt
+                      fontSize="large"
+                      className=""
+                      onClick={like}
+                    />
+                  </div>
+                )}
+
                 <div className="flex justify-between">
                   <span className="text-xs text-gray-500">
                     <LocationOnIcon fontSize="small" />
@@ -60,13 +209,6 @@ const Feed = () => {
                   </span>
                   <span className="text-xs text-gray-500">
                     {moment(job.postdate).fromNow()}{" "}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <div className="flex-grow"></div>
-                  <span className="text-xs text-gray-500">
-                    {job.likes.length - 1} <ThumbUpOffAlt />
-                    {/*<ThumbUpIcon/>*/}
                   </span>
                 </div>
 
@@ -81,15 +223,14 @@ const Feed = () => {
                 </div>
 
                 <CardContent orientation="horizontal">
-                  <Typography variant="h5" gutterBottom>
+                  <div className="font-medium text-2xl" >
                     {job.title}
-                  </Typography>
+                  </div>
                 </CardContent>
-                <div className="text-sm text-gray-600 ">{job.position}</div>
+                <div className="text-sm  text-gray-600 ">{job.position}</div>
                 <CardContent sx={{ gap: 0.5, mt: 1 }}>
-                  <Typography variant="body1" gutterBottom>
-                    {job.description}
-                  </Typography>
+                    <span className="text-xs font-medium">{job.description.slice(0, 98) + "..."}</span>
+                  
                 </CardContent>
                 {job.tags && (
                   <div>
@@ -124,6 +265,22 @@ const Feed = () => {
                         ))}
                   </div>
                 )}
+                <FormControl className="w-1/4 absolute cursor-pointer">
+                  <InputLabel variant="standard" htmlFor="uncontrolled-native">
+                    Mark
+                  </InputLabel>
+                  <NativeSelect
+                    defaultValue={30}
+                    inputProps={{
+                      name: "mark",
+                      id: "uncontrolled-native",
+                    }}
+                  >
+                    <option value=""></option>
+                    <option value="Applied">Applied</option>
+                    <option value="Want to Apply">Want to Apply</option>
+                  </NativeSelect>
+                </FormControl>
               </Card>
             </>
           ))}
