@@ -7,17 +7,26 @@ function Register() {
   const navigate = useNavigate();
 
   const [inputs, setInputs] = useState({
-    type: "",
+    type: "Job Seeker",
     username: "",
     email: "",
     password: "",
+    firstname:"",
+    lastname:"",
+    bio:"",
+    country: "",
+    birthdate: "",
+    company: "",
+    title: "",
+    experience: [],
+    education: [],
   });
 
   const submit = async (e) => {
     e.preventDefault();
     try {
       await _axios.post("auth/register", inputs);
-      navigate("/signin");
+      navigate("/login");
     } catch (err) {
       setError(err.response.data);
     }
@@ -51,8 +60,8 @@ function Register() {
               className="w-full px-4 py-2 mt-2 text-blue-950 bg-white border rounded-md focus:border-blue-950 focus:ring-blue-950 focus:outline-none focus:ring focus:ring-opacity-40"
               onChange={handleChange}
             >
-              <option value="employee">Job Seeker</option>
-              <option value="employer">Employer</option>
+              <option value="Job Seeker">Job Seeker</option>
+              <option value="Employer">Employer</option>
             </select>
           </div>
           <div className="mb-2 w-full">
