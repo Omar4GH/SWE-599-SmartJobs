@@ -22,6 +22,7 @@ import ThumbUpOffAlt from "@mui/icons-material/ThumbUpOffAlt";
 import ThumbUpIcon from "@mui/icons-material/ThumbUp";
 import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
 import BookmarkIcon from "@mui/icons-material/Bookmark";
+import BookmarkRemoveIcon from '@mui/icons-material/BookmarkRemove';
 
 const Profile = () => {
   const { currentUser } = useContext(AuthContext);
@@ -44,13 +45,13 @@ const Profile = () => {
     if (currentUser && savedPostsIds && currentUser.type === "Job Seeker") {
       getSavedJobs();
     }
-  }, [savedPostsIds]);
+  }, [savedPostsIds,trigger]);
 
   useEffect(() => {
     if (currentUser && savedPostsIds && currentUser.type === "Employer") {
       getUserJobs();
     }
-  }, []);
+  }, [trigger]);
 
   const getUser = async () => {
     try {
@@ -75,6 +76,23 @@ const Profile = () => {
         console.error("Error fetching saved job posts:", error);
       });
   };
+
+  const removeSavedJob = async (jobId) => {
+    try {
+      const response = await _axios.post(`/users/${currentUser._id}/saved-jobs/remove`, { jobId });
+      if (response.status === 200) {
+        setTrigger(!trigger);
+        console.log('Job unSaved successfully');
+      } else {
+        console.log('User not found or error occurred.');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
+
+
+
   const getUserJobs = async () => {
     try {
       const res = await _axios.get(`jobs/user/${currentUser._id}`);
@@ -91,6 +109,18 @@ const Profile = () => {
         setNationalities(data.map((country) => country.name));
       });
   }, []);
+
+
+  const deleteJob = (id) => {
+    _axios
+      .delete(
+        `jobs/${id}`
+      )
+      .then((response) => {
+        setTrigger(!trigger);
+      });
+  };
+
   ////////////profile update
   const [bio, setBio] = useState("");
   const [country, setCountry] = useState("");
@@ -124,6 +154,10 @@ const Profile = () => {
     }
   };
   /////////////////////////
+
+ 
+
+
 
   const [showMore, setShowMore] = useState({});
   const handleShowMore = (jobId) => {
@@ -470,6 +504,10 @@ const Profile = () => {
                                   <span className="text-xs text-gray-500">
                                     {moment(job.postdate).fromNow()}{" "}
                                   </span>
+                                  <BookmarkRemoveIcon
+                              onClick={() => removeSavedJob(job._id)}
+                              className="cursor-pointer hover:text-red-800"
+                            />
                                 </div>
 
                                 <div className="flex items-center">
@@ -588,6 +626,10 @@ const Profile = () => {
                                   <span className="text-xs text-gray-500">
                                     {moment(job.postdate).fromNow()}{" "}
                                   </span>
+                                  <DeleteIcon
+                              onClick={() => deleteJob(job._id)}
+                              className="cursor-pointer hover:text-red-800"
+                            />
                                 </div>
 
                                 <div>
