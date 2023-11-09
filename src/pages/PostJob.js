@@ -2,11 +2,12 @@ import React, { useContext, useEffect, useState } from "react";
 import _axios from "../api/_axios";
 import { AuthContext } from "../context/authContext";
 import { useNavigate } from "react-router-dom";
-
 import Input from "@mui/joy/Input";
 import Autocomplete from "@mui/material/Autocomplete";
 import { TextField } from "@material-ui/core";
 
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
 const PostJob = () => {
   const { currentUser } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -54,7 +55,7 @@ const PostJob = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-  
+
     // For the "tags" field, split the comma-separated values into an array
     if (name === "tags") {
       const tagsArray = value.split(",").map((tag) => tag.trim());
@@ -62,7 +63,12 @@ const PostJob = () => {
         ...formData,
         [name]: tagsArray,
       });
-    } else {
+    } else if (name === "active") {
+      setFormData({
+        ...formData,
+        [name]: value === "true", // Convert the selected value to a boolean
+      });
+    }else {
       setFormData({
         ...formData,
         [name]: value,
@@ -70,7 +76,12 @@ const PostJob = () => {
     }
     console.log(formData);
   };
-
+  const handleQuillChange = (value) => {
+    setFormData({
+      ...formData,
+      description: value,
+    });
+  };
   const submit = async (e) => {
     e.preventDefault();
     try {
@@ -81,12 +92,30 @@ const PostJob = () => {
     }
   };
 
+  const colors = ["red", "green", "blue", "orange", "violet", "white", "black"];
+
+  const toolbarOptions = [
+    [{ font: ["serif", "monospace"] }, { size: ["small", "large", "huge"] }],
+    ["bold", "italic", "underline", "strike"],
+    [{ color: colors }, { background: colors }],
+    [{ script: "sub" }, { script: "super" }],
+    [{ header: [1, 2, false] }, "blockquote", "code-block"],
+    [
+      { list: "ordered" },
+      { list: "bullet" },
+      { indent: "-1" },
+      { indent: "+1" },
+    ],
+    [{ direction: "rtl" }, { align: [] }],
+    ["link", "video", "formula"],
+  ];
+
   return (
-    <div className="flex justify-center bg-gray-100 items-center h-screen">
+    <div className="flex justify-center bg-gray-100 items-center h-full">
       {currentUser ? (
         <>
-          <div className="w-4/5 justify-center bg-white p-8 items-center rounded-3xl shadow-lg">
-            <h1 className="text-2xl font-bold mb-4">Post a Job</h1>
+          <div className="w-4/5 justify-center my-11 bg-white p-8 items-center rounded-3xl shadow-lg">
+            <h1 className="text-2xl font-bold mb-4 ">Post a Job</h1>
 
             <form onSubmit={submit}>
               <div className="mb-4">
@@ -112,16 +141,17 @@ const PostJob = () => {
                 >
                   Description
                 </label>
-                <textarea
-                  id="description"
-                  name="description"
-                  placeholder="Enter Job Description"
-                  rows="4"
-                  className="w-1/2 p-2 border border-gray-300 rounded-md"
-                  required
-                  value={formData.description}
-                  onChange={handleInputChange}
-                />
+                <div className=" text-slate-900 h-full ">
+                  <ReactQuill
+                    className="editor"
+                    theme="snow"
+                    value={formData.description}
+                    onChange={handleQuillChange}
+                    modules={{
+                      toolbar: toolbarOptions,
+                    }}
+                  />
+                </div>
               </div>
 
               <div className="mb-4">
