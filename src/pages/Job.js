@@ -44,10 +44,12 @@ const Job = () => {
   return (
     <div className="h-screen w-full bg-slate-50">
       <div className="flex items-center h-screen w-4/5 mx-auto">
-        <div className="w-2/3 p-4 py-10 bg-white rounded-lg shadow-md">
-          <h1 className="text-2xl font-semibold mb-4">{job.title}</h1>
-          <p className="text-lg text-gray-700">{job.description}</p>
-        </div>
+      <div className="w-2/3 p-4 bg-white rounded-lg shadow-md" style={{ overflowY: "auto" }}>
+  <h1 className="text-2xl font-semibold mb-16">{job.title}</h1>
+  <p className="text-lg text-gray-700" dangerouslySetInnerHTML={{ __html: job.description }}></p>
+</div>
+
+
         <div className="w-1/4 p-4 bg-gray-100 rounded-lg shadow-md ml-4">
           <div className="flex items-center mb-2">
             <Avatar
@@ -55,7 +57,7 @@ const Job = () => {
               sx={{ width: 50, height: 50 }}
             />
             <span className="text-gray-700 text-sm">
-              &nbsp;&nbsp;{job?.user[0]?.username}
+              &nbsp;&nbsp;{job?.user?.[0]?.username || "Unknown"}
             </span>
           </div>
           <p className="text-sm text-gray-600 mb-2">
@@ -65,14 +67,20 @@ const Job = () => {
             0{job?.likes?.length} Likes
           </p>
           <p className="text-lg mb-2 text-gray-700">Location: {job.location}</p>
-          {job?.tags?.map((tag, index) => (
-            <Chip
-              className="w-fit feed-chip mt-2 mr-2"
-              key={tag}
-              label={tag}
-              size="small"
-            />
-          ))}
+          {job.tags && job.tags.length > 0 ? (
+            <>
+              {job?.tags?.map((tag, index) => (
+                <Chip
+                  className="w-fit feed-chip mt-2 mr-2"
+                  key={tag}
+                  label={tag}
+                  size="small"
+                />
+              ))}
+            </>
+          ) : (
+            <></>
+          )}
         </div>
       </div>
     </div>
