@@ -12,6 +12,7 @@ import Register from './pages/Register';
 import PostJob from './pages/PostJob';
 import Footer from './components/Footer';
 import Job from './pages/Job';
+import OtherProfile from './pages/OtherProfile';
 
 function App() {
   return (
@@ -27,6 +28,7 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/postjob" element={<PostJob />} />
         <Route path="/job/:id" element={<Job />} />
+        <Route path="/otherprofile/:id" element={<OtherProfile />} />
       </Routes>
       <Footer/>
     </Router>
