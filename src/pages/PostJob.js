@@ -40,7 +40,7 @@ const PostJob = () => {
   const jobData = {
     ...formData,
     postdate: new Date().toISOString(),
-    likes: 0,
+    likes: [],
     ...(currentUser ? { uid: currentUser._id } : {}),
   };
 

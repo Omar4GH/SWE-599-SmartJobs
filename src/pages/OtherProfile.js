@@ -115,6 +115,41 @@ const OtherProfile = () => {
       console.error("Error:", error);
     }
   };
+  ////////////////////////////////////
+  const likeJob = async (jobId) => {
+    try {
+      const response = await _axios.post(
+        `/jobs/${jobId}/like-job`,
+        { userId: currentUser._id }
+      );
+      if (response.status === 200) {
+        console.log("Job LIKED successfully");
+        setTrigger(!trigger);
+      } else {
+        console.log("Job not found or error occurred.");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+
+  const removeLike = async (jobId) => {
+    try {
+      const response = await _axios.post(
+        `/jobs/${jobId}/like-job/remove`,
+        { userId: currentUser._id }
+      );
+      if (response.status === 200) {
+        setTrigger(!trigger);
+        console.log("Job unLIKED successfully");
+      } else {
+        console.log("Job not found or error occurred.");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+  ///////////////////////////////////
 
   const [showMore, setShowMore] = useState({});
   const handleShowMore = (jobId) => {
@@ -317,8 +352,25 @@ const OtherProfile = () => {
                                   {moment(job.postdate).fromNow()}
                                 </div>
                                 <div className="flex items-center text-xs space-x-2">
-                                  <ThumbUpOffAlt fontSize="medium" />
-                                  {job?.likes}
+                                {job.likes && job.likes.includes(currentUser._id) ? (
+                  <>
+                    {" "}
+                    <ThumbUpIcon
+                      fontSize="medium"
+                      onClick={() => removeLike(job._id)}
+                      className=" cursor-pointer hover:text-red-800"
+                    />
+                  </>
+                ) : (
+                  <>
+                    <ThumbUpOffAlt
+                      fontSize="medium"
+                      onClick={() => likeJob(job._id)}
+                      className=" cursor-pointer hover:text-blue-800"
+                    />
+                  </>
+                )}
+                                  {job?.likes.length}
                                 </div>{" "}
                                 {savedPosts && savedPosts.includes(job._id) ? (
                                   <>
@@ -354,6 +406,7 @@ const OtherProfile = () => {
                                             key={tag}
                                             label={tag}
                                             size="small"
+                                            color="primary"
                                           />
                                         ))}
                                       {job.tags.length > 5 &&
@@ -380,6 +433,7 @@ const OtherProfile = () => {
                                               key={tag}
                                               label={tag}
                                               size="small"
+                                              color="primary"
                                             />
                                           ))}
                                     </div>
