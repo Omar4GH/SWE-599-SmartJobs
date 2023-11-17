@@ -31,6 +31,7 @@ import Menu from "@mui/joy/Menu";
 import MenuButton from "@mui/joy/MenuButton";
 import MenuItem from "@mui/joy/MenuItem";
 import MoreVert from "@mui/icons-material/MoreVert";
+import Switch from "@mui/material/Switch";
 
 const Profile = () => {
   const { currentUser } = useContext(AuthContext);
@@ -147,6 +148,7 @@ const Profile = () => {
   const [education, setEducation] = useState([]);
   const [firstname, setFirstname] = useState("");
   const [lastname, setLastname] = useState("");
+  const [mailing, setMailing] = useState(false);
   const updateProfile = async (e) => {
     e.preventDefault();
 
@@ -158,6 +160,7 @@ const Profile = () => {
           bio: bio || userInfo.bio,
           birthdate: birthdate || userInfo.birthdate,
           country: country || userInfo.country,
+          mailing: mailing,
           title: title || userInfo.title,
           company: company || userInfo.company,
         })
@@ -307,6 +310,16 @@ const Profile = () => {
                     @{currentUser.username}
                   </p>
                 </div>
+                <select
+                  className="w-fit border rounded-lg shadow-md"
+                  value={userInfo.mailing ? "true" : "false"}
+                  onChange={(e) => {
+                    setMailing(e.target.value === "true");
+                  }}
+                >
+                  <option value="true">I want to Receive Emails</option>
+                  <option value="false">No emails</option>
+                </select>
                 <div className="mt-5">
                   <h3 className="text-lg font-medium text-gray-900">
                     Profile Information
