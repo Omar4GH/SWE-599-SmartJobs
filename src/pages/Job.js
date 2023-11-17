@@ -98,7 +98,40 @@ const Job = () => {
     }
   };
   /////////////////////////////////////////////////////////////
+ /////////////LIKE//////////////
+ const likeJob = async (jobId) => {
+  try {
+    const response = await _axios.post(`/jobs/${jobId}/like-job`, {
+      userId: currentUser._id,
+    });
+    if (response.status === 200) {
+      console.log("Job LIKED successfully");
+      setTrigger(!trigger);
+    } else {
+      console.log("Job not found or error occurred.");
+    }
+  } catch (error) {
+    console.error("Error:", error);
+  }
+};
 
+const removeLike = async (jobId) => {
+  try {
+    const response = await _axios.post(`/jobs/${jobId}/like-job/remove`, {
+      userId: currentUser._id,
+    });
+    if (response.status === 200) {
+      setTrigger(!trigger);
+      console.log("Job unLIKED successfully");
+    } else {
+      console.log("Job not found or error occurred.");
+    }
+  } catch (error) {
+    console.error("Error:", error);
+  }
+};
+
+////////////////////////
   return (
     <div className="w-full bg-slate-100  ">
       <div className="flex items-center h-full w-4/5 mx-auto">
@@ -134,9 +167,26 @@ const Job = () => {
             <div className="flex mt-5 border w-fit rounded-md justify-end border-gray-300 p-3 bg-white">
               <div className="flex">
                 <p className="text-lg text-blue-600 font-semibold mr-2">
-                  0{job?.likes?.length}
+                  {job?.likes?.length}
                 </p>{" "}
-                <ThumbUpIcon fontSize="large" />
+                {job.likes && job.likes.includes(currentUser._id) ? (
+                  <>
+                    {" "}
+                    <ThumbUpIcon
+                      fontSize="large"
+                      onClick={() => removeLike(job._id)}
+                      className=" cursor-pointer hover:text-red-800"
+                    />
+                  </>
+                ) : (
+                  <>
+                    <ThumbUpOffAlt
+                      fontSize="large"
+                      onClick={() => likeJob(job._id)}
+                      className=" cursor-pointer hover:text-blue-800"
+                    />
+                  </>
+                )}
               </div>
               {savedPosts && savedPosts.includes(job._id) ? (
                 <>
@@ -191,6 +241,7 @@ const Job = () => {
                     key={tag}
                     label={tag}
                     size="small"
+                    color="primary"
                   />
                 ))}
               </>

@@ -101,252 +101,48 @@ const Feed = () => {
     }
   };
 
-  const like = () => {
-    setLiked(!liked);
+  const likeJob = async (jobId) => {
+    try {
+      const response = await _axios.post(`/jobs/${jobId}/like-job`, {
+        userId: currentUser._id,
+      });
+      if (response.status === 200) {
+        console.log("Job LIKED successfully");
+        setTrigger(!trigger);
+      } else {
+        console.log("Job not found or error occurred.");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
   };
-  const save = () => {
-    setSaved(!saved);
+
+  const removeLike = async (jobId) => {
+    try {
+      const response = await _axios.post(`/jobs/${jobId}/like-job/remove`, {
+        userId: currentUser._id,
+      });
+      if (response.status === 200) {
+        setTrigger(!trigger);
+        console.log("Job unLIKED successfully");
+      } else {
+        console.log("Job not found or error occurred.");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
   };
 
   return (
     <div className="flex flex-col items-center h-full bg-slate-100">
       <div className="text-2xl mb-4"></div>
 
-      <Card
-        variant="outlined"
-        sx={{
-          width: "max(400px, 60%)",
-          borderRadius: "16px", // Adjust the value for the desired border radius
-          boxShadow: "0px 4px 4px rgba(0, 0, 0, 0.25)", // Add shadow properties
-        }}
-        className="w-full max-w-xl mb-4 elevation-2" // Use elevation-2 for the desired elevation level
-      >
-        {saved ? (
-          <>
-            {" "}
-            <BookmarkIcon
-              fontSize="large"
-              className="absolute right-0 top-10 cursor-pointer"
-              onClick={save}
-            />
-          </>
-        ) : (
-          <>
-            <BookmarkBorderIcon
-              fontSize="large"
-              className="absolute right-0 top-10 cursor-pointer"
-              onClick={save}
-            />
-          </>
-        )}
-
-        {liked ? (
-          <div className="absolute right-10 top-10 cursor-pointer">
-            5
-            <ThumbUpIcon fontSize="large" className="" onClick={like} />
-          </div>
-        ) : (
-          <div className="absolute right-10 top-10 cursor-pointer">
-            0 <ThumbUpOffAlt fontSize="large" className="" onClick={like} />
-          </div>
-        )}
-
-        <div className="flex justify-between">
-          <span className="text-xs text-gray-500">
-            <LocationOnIcon fontSize="small" />
-            Turkey
-          </span>
-          <span className="text-xs text-gray-500">10 mins ago</span>
-        </div>
-
-        <div className="flex items-center">
-          <Avatar
-            src="https://media.istockphoto.com/id/1300845620/vector/user-icon-flat-isolated-on-white-background-user-symbol-vector-illustration.jpg?s=612x612&w=0&k=20&c=yBeyba0hUkh14_jgv1OKqIH0CCSWU_4ckRkAoy2p73o="
-            sx={{ width: 75, height: 75 }}
-          />
-          <span className="text-gray-700 text-sm">Omar Gh</span>
-        </div>
-
-        <CardContent orientation="horizontal">
-          <Typography variant="h5" gutterBottom>
-            Junior Software Engineer
-          </Typography>
-        </CardContent>
-        <div className="text-sm text-gray-600 ">Junior developer</div>
-        <CardContent sx={{ gap: 0.5, mt: 1 }}>
-          <Typography variant="body1" gutterBottom>
-            Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem
-            Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum
-          </Typography>
-        </CardContent>
-        <div>
-          <Chip
-            className="w-fit feed-chip mt-2 mr-2"
-            label="TEST"
-            size="small"
-          />
-          <Chip
-            className="w-fit feed-chip mt-2 mr-2"
-            label="TAG"
-            size="small"
-          />
-        </div>
-        <FormControl className="w-1/4 absolute cursor-pointer">
-          <InputLabel variant="standard" htmlFor="uncontrolled-native">
-            Mark
-          </InputLabel>
-          <NativeSelect
-            defaultValue={30}
-            inputProps={{
-              name: "mark",
-              id: "uncontrolled-native",
-            }}
-          >
-            <option value=""></option>
-            <option value="Applied">Applied</option>
-            <option value="Want to Apply">Want to Apply</option>
-          </NativeSelect>
-        </FormControl>
-      </Card>
-
       {jobs ? (
         <>
           {jobs.map((job) => (
-            <>{/* 
-              <Card
-                variant="outlined"
-                sx={{
-                  width: "max(400px, 60%)",
-                  borderRadius: "16px", // Adjust the value for the desired border radius
-                  boxShadow: "0px 4px 4px rgba(0, 0, 0, 0.25)", // Add shadow properties
-                }}
-                className="w-full max-w-xl mb-4 elevation-2" // Use elevation-2 for the desired elevation level
-              >
-                {savedPosts && savedPosts.includes(job._id) ? (
-                  <>
-                    {" "}
-                    <BookmarkRemoveIcon
-                      fontSize="large"
-                      onClick={() => removeSavedJob(job._id)}
-                      className="absolute right-0 top-10 cursor-pointer hover:text-red-800"
-                    />
-                  </>
-                ) : (
-                  <>
-                    <BookmarkBorderIcon
-                      fontSize="large"
-                      onClick={() => updateSavedJobs(job._id)}
-                      className="absolute right-0 top-10 cursor-pointer hover:text-blue-800"
-                    />
-                  </>
-                )}
-
-                {liked ? (
-                  <div className="absolute right-10 top-10 cursor-pointer">
-                    {job.likes.length - 1}
-                    <ThumbUpIcon fontSize="large" className="" onClick={like} />
-                  </div>
-                ) : (
-                  <div className="absolute right-10 top-10 cursor-pointer">
-                    {job.likes.length - 1}{" "}
-                    <ThumbUpOffAlt
-                      fontSize="large"
-                      className=""
-                      onClick={like}
-                    />
-                  </div>
-                )}
-                <Link to={`/job/${job._id}`}>
-                  <div className="flex justify-between">
-                    <span className="text-xs text-gray-500">
-                      <LocationOnIcon fontSize="small" />
-                      {job.location}
-                    </span>
-                    <span className="text-xs text-gray-500">
-                      {moment(job.postdate).fromNow()}{" "}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center">
-                    <Avatar
-                      src="https://media.istockphoto.com/id/1300845620/vector/user-icon-flat-isolated-on-white-background-user-symbol-vector-illustration.jpg?s=612x612&w=0&k=20&c=yBeyba0hUkh14_jgv1OKqIH0CCSWU_4ckRkAoy2p73o="
-                      sx={{ width: 75, height: 75 }}
-                    />
-                    <span className="text-gray-700 text-sm">
-                      {job?.user?.[0]?.username}
-                    </span>
-                  </div>
-
-                  <CardContent orientation="horizontal">
-                    <div className="font-medium text-2xl">{job.title}</div>
-                  </CardContent>
-                  <div className="text-sm  text-gray-600 ">{job.position}</div>
-                  <CardContent sx={{ gap: 0.5, mt: 1 }}>
-                    <span
-                      className="text-xs font-medium"
-                      dangerouslySetInnerHTML={{
-                        __html: job.description.slice(0, 98) + "...",
-                      }}
-                    ></span>
-                  </CardContent>
-                  {job.tags && (
-                    <div>
-                      {job.tags.slice(0, 8).map((tag, index) => (
-                        <Chip
-                          className="w-fit feed-chip mt-2 mr-2"
-                          key={tag}
-                          label={tag}
-                          size="small"
-                        />
-                      ))}
-                      {job.tags.length > 6 && job.tags.slice(8).length > 0 && (
-                        <button
-                          className="text-blue-500 text-sm float-right font-semibold mt-2 focus:outline-none"
-                          onClick={() => handleShowMore(job._id)}
-                        >
-                          {showMore[job.id]
-                            ? "Show Less"
-                            : `+${job.tags.slice(8).length} more`}
-                        </button>
-                      )}
-                      {showMore[job._id] &&
-                        job.tags
-                          .slice(8)
-                          .map((tag, index) => (
-                            <Chip
-                              className="w-fit feed-chip mt-2 mr-2"
-                              key={tag}
-                              label={tag}
-                              size="small"
-                            />
-                          ))}
-                    </div>
-                  )}
-                  <FormControl className="w-1/4 absolute cursor-pointer">
-                    <InputLabel
-                      variant="standard"
-                      htmlFor="uncontrolled-native"
-                    >
-                      Mark
-                    </InputLabel>
-                    <NativeSelect
-                      defaultValue={30}
-                      inputProps={{
-                        name: "mark",
-                        id: "uncontrolled-native",
-                      }}
-                    >
-                      <option value=""></option>
-                      <option value="Applied">Applied</option>
-                      <option value="Want to Apply">Want to Apply</option>
-                    </NativeSelect>
-                  </FormControl>
-                </Link>
-              </Card>
-*/}
+            <>
               <>
                 {" "}
-               
                 <div
                   className=" transition duration-300 ease-in-out transform hover:scale-105 hover:shadow-2xl mb-10 bg-gradient-to-b h-full text-gray-900 from-white to-blue-50  p-6 rounded-lg shadow-xl w-1/2 max-w-xl mx-auto mt-8 border-solid border-black"
                   style={{
@@ -354,33 +150,35 @@ const Feed = () => {
                     boxShadow: "0px 4px 4px rgba(0, 0, 0, 0.25)",
                     borderRadius: "16px", // Adjust the value for the desired border radius
                   }}
-                 
-                > <Link to={`/job/${job._id}`}>
-                  <div className="flex items-center justify-between mb-4">
-                    <h1 className="text-3xl font-medium">{job?.title}</h1>
-                    <div className="flex items-center space-x-2">
-                      <img
-                        src="https://media.istockphoto.com/id/1300845620/vector/user-icon-flat-isolated-on-white-background-user-symbol-vector-illustration.jpg?s=612x612&w=0&k=20&c=yBeyba0hUkh14_jgv1OKqIH0CCSWU_4ckRkAoy2p73o="
-                        alt="User Avatar"
-                        style={{
-                          width: "50px",
-                          height: "50px",
-                          borderRadius: "50%",
-                        }}
-                      />
+                >
+                  {" "}
+                  <Link to={`/job/${job._id}`}>
+                    <div className="flex items-center justify-between mb-4">
+                      <h1 className="text-3xl font-medium">{job?.title}</h1>
+                      <div className="flex items-center space-x-2">
+                        <img
+                          src="https://media.istockphoto.com/id/1300845620/vector/user-icon-flat-isolated-on-white-background-user-symbol-vector-illustration.jpg?s=612x612&w=0&k=20&c=yBeyba0hUkh14_jgv1OKqIH0CCSWU_4ckRkAoy2p73o="
+                          alt="User Avatar"
+                          style={{
+                            width: "50px",
+                            height: "50px",
+                            borderRadius: "50%",
+                          }}
+                        />
 
-                      {job?.user?.[0]?.username || "Unknown"}
+                        {job?.user?.[0]?.username || "Unknown"}
+                      </div>
                     </div>
-                  </div>
-                  <div className="text-base font-medium mb-2">
-                    {job?.position}
-                  </div>
-                  <div
-                    className="mb-4 text-base text-black"
-                    dangerouslySetInnerHTML={{
-                      __html: job.description.slice(0, 90) + "...",
-                    }}
-                  ></div></Link>
+                    <div className="text-base font-medium mb-2">
+                      {job?.position}
+                    </div>
+                    <div
+                      className="mb-4 text-base text-black"
+                      dangerouslySetInnerHTML={{
+                        __html: job.description.slice(0, 90) + "...",
+                      }}
+                    ></div>
+                  </Link>
                   <div className="flex flex-wrap items-center space-x-4">
                     <div className="flex text-sm items-center space-x-2">
                       <LocationOnIcon />
@@ -391,27 +189,54 @@ const Feed = () => {
                       {moment(job.postdate).fromNow()}
                     </div>
                     <div className="flex items-center text-sm space-x-2">
-                      <ThumbUpOffAlt fontSize="large" />
-                      {job?.likes}
+                      {currentUser ? (
+                        job.likes && job.likes.includes(currentUser?._id) ? (
+                          <>
+                            {" "}
+                            <ThumbUpIcon
+                              fontSize="large"
+                              onClick={() => removeLike(job._id)}
+                              className=" cursor-pointer hover:text-red-800"
+                            />
+                          </>
+                        ) : (
+                          <>
+                            <ThumbUpOffAlt
+                              fontSize="large"
+                              onClick={() => likeJob(job._id)}
+                              className=" cursor-pointer hover:text-blue-800"
+                            />
+                          </>
+                        )
+                      ) : (
+                        <>
+                          <ThumbUpOffAlt
+                            fontSize="large"
+                            className=" cursor-pointer hover:text-gray-700"
+                          />
+                        </>
+                      )}
+
+                      {job?.likes.length}
                     </div>{" "}
                     {savedPosts && savedPosts.includes(job._id) ? (
-                  <>
-                    {" "}
-                    <BookmarkRemoveIcon
-                      fontSize="large"
-                      onClick={() => removeSavedJob(job._id)}
-                      className=" cursor-pointer hover:text-red-800"
-                    />
-                  </>
-                ) : (
-                  <>
-                    <BookmarkBorderIcon
-                      fontSize="large"
-                      onClick={() => updateSavedJobs(job._id)}
-                      className=" cursor-pointer hover:text-blue-800"
-                    />
-                  </>
-                )}
+                      <>
+                        {" "}
+                        <BookmarkRemoveIcon
+                          fontSize="large"
+                          onClick={() => removeSavedJob(job._id)}
+                          className=" cursor-pointer hover:text-red-800"
+                        />
+                      </>
+                    ) : (
+                      <>
+                        <BookmarkBorderIcon
+                          fontSize="large"
+                          onClick={() => updateSavedJobs(job._id)}
+                          className=" cursor-pointer hover:text-blue-800"
+                        />
+                      </>
+                    )}
                   </div>
                   <div className="mt-3">
                     <div className="text-lg font-semibold">Tags</div>
@@ -424,6 +249,7 @@ const Feed = () => {
                               key={tag}
                               label={tag}
                               size="medium"
+                              color="primary"
                             />
                           ))}
                           {job.tags.length > 5 &&
@@ -446,6 +272,7 @@ const Feed = () => {
                                   key={tag}
                                   label={tag}
                                   size="medium"
+                                  color="primary"
                                 />
                               ))}
                         </div>
