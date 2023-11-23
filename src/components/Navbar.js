@@ -3,13 +3,21 @@ import { AuthContext } from "../context/authContext";
 import { Fragment } from "react";
 import { Disclosure, Menu, Transition } from "@headlessui/react";
 import { Bars3Icon, BellIcon, XMarkIcon } from "@heroicons/react/24/outline";
-
+import { useNavigate } from "react-router-dom";
+import logo from "../assets/SmartJobsSmallLogo.png";
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
 const Navbar = () => {
   const { currentUser, logout } = useContext(AuthContext);
+
+  const navigate = useNavigate();
+
+  const redirect = (path) => {
+    navigate(path);
+  };
+
   return (
     <Disclosure as="nav" className="bg-gray-800">
       {({ open }) => (
@@ -29,14 +37,12 @@ const Navbar = () => {
                 </Disclosure.Button>
               </div>
               <div className="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
-                <div className="flex flex-shrink-0 items-center">
-                  {" "}
-                  LOGO
-                  {/*   <img
-                    className="h-8 w-auto"
-                    src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=500"
-                    alt="Your Company"
-                  />*/}
+                <div onClick={() => redirect('/')} className="flex flex-shrink-0 items-center cursor-pointer">
+                    <img
+                    className="h-11 w-auto"
+                    src={logo}
+                    alt="Logo"
+                  />
                 </div>
                 <div className="hidden sm:ml-6 sm:block">
                   <div className="flex space-x-4">
