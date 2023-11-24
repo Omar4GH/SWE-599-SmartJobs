@@ -15,7 +15,7 @@ const Home = () => {
   return (
     <section className="w-full lg:h-screen md:h-[550px] h-[830px] relative overflow-x-hidden flex justify-end">
       <img
-        className="h-[60%] w-[80%] lg:h-[100%] md:h-[50vh] lg:w-full md:w-[55%]"
+        className="h-[100%] w-[100%] lg:h-[100%] md:h-[100%] lg:w-full md:w-[100%]"
         src={heroBg}
         alt="Hero Background Vector"
       />
