@@ -173,8 +173,10 @@ const OtherProfile = () => {
             <div className="max-w-4xl mx-auto bg-white rounded-3xl px-14 py-1">
               <div className="text-center">
                 <img
-                  src="https://avatars.dicebear.com/api/adventurer-neutral/mail%40ashallendesign.co.uk.svg"
-                  alt="Profile Picture"
+                    src={
+                      userInfo.profileImage ||
+                      "https://avatars.dicebear.com/api/adventurer-neutral/mail%40ashallendesign.co.uk.svg"
+                    } alt="Profile Picture"
                   className="mx-auto h-24 w-24 rounded-full"
                 />
                 <p className="mt-2 text-sm text-gray-500">{userInfo.title}</p>
@@ -319,8 +321,10 @@ const OtherProfile = () => {
                                   </h1>
                                   <div className="flex text-sm items-center space-x-2">
                                     <img
-                                      src="https://media.istockphoto.com/id/1300845620/vector/user-icon-flat-isolated-on-white-background-user-symbol-vector-illustration.jpg?s=612x612&w=0&k=20&c=yBeyba0hUkh14_jgv1OKqIH0CCSWU_4ckRkAoy2p73o="
-                                      alt="User Avatar"
+                                        src={
+                                          job?.user?.[0].profileImage ||
+                                          "https://avatars.dicebear.com/api/adventurer-neutral/mail%40ashallendesign.co.uk.svg"
+                                        } alt="User Avatar"
                                       style={{
                                         width: "40px",
                                         height: "40px",

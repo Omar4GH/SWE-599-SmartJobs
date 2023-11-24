@@ -12,7 +12,8 @@ import BookmarkRemoveIcon from "@mui/icons-material/BookmarkRemove";
 import Button from "@mui/joy/Button";
 import IconButton from "@mui/joy/IconButton";
 import OpenInNew from "@mui/icons-material/OpenInNew";
-
+import AlarmIcon from "@mui/icons-material/Alarm";
+import PaidIcon from "@mui/icons-material/Paid";
 import {
   Avatar,
   Chip,
@@ -98,43 +99,43 @@ const Job = () => {
     }
   };
   /////////////////////////////////////////////////////////////
- /////////////LIKE//////////////
- const likeJob = async (jobId) => {
-  try {
-    const response = await _axios.post(`/jobs/${jobId}/like-job`, {
-      userId: currentUser._id,
-    });
-    if (response.status === 200) {
-      console.log("Job LIKED successfully");
-      setTrigger(!trigger);
-    } else {
-      console.log("Job not found or error occurred.");
+  /////////////LIKE//////////////
+  const likeJob = async (jobId) => {
+    try {
+      const response = await _axios.post(`/jobs/${jobId}/like-job`, {
+        userId: currentUser._id,
+      });
+      if (response.status === 200) {
+        console.log("Job LIKED successfully");
+        setTrigger(!trigger);
+      } else {
+        console.log("Job not found or error occurred.");
+      }
+    } catch (error) {
+      console.error("Error:", error);
     }
-  } catch (error) {
-    console.error("Error:", error);
-  }
-};
+  };
 
-const removeLike = async (jobId) => {
-  try {
-    const response = await _axios.post(`/jobs/${jobId}/like-job/remove`, {
-      userId: currentUser._id,
-    });
-    if (response.status === 200) {
-      setTrigger(!trigger);
-      console.log("Job unLIKED successfully");
-    } else {
-      console.log("Job not found or error occurred.");
+  const removeLike = async (jobId) => {
+    try {
+      const response = await _axios.post(`/jobs/${jobId}/like-job/remove`, {
+        userId: currentUser._id,
+      });
+      if (response.status === 200) {
+        setTrigger(!trigger);
+        console.log("Job unLIKED successfully");
+      } else {
+        console.log("Job not found or error occurred.");
+      }
+    } catch (error) {
+      console.error("Error:", error);
     }
-  } catch (error) {
-    console.error("Error:", error);
-  }
-};
+  };
 
-////////////////////////
+  ////////////////////////
   return (
     <div className="w-full bg-slate-100  ">
-      <div className="flex items-center h-full w-4/5 mx-auto">
+      <div className="flex items-center h-screen w-4/5 mx-auto">
         <div
           className="w-2/3 p-4 bg-white rounded-lg my-6 shadow-md"
           style={{ overflowY: "auto" }}
@@ -149,18 +150,37 @@ const removeLike = async (jobId) => {
         <div className="w-1/4 p-4 bg-gray-50 rounded-lg shadow-md ml-4 justify-center">
           <div className="flex items-center mb-2 mt-5 border rounded-md border-gray-300 p-3 bg-white">
             <Avatar
-              src="https://media.istockphoto.com/id/1300845620/vector/user-icon-flat-isolated-on-white-background-user-symbol-vector-illustration.jpg?s=612x612&w=0&k=20&c=yBeyba0hUkh14_jgv1OKqIH0CCSWU_4ckRkAoy2p73o="
+              src={
+                job?.user?.[0].profileImage ||
+                "https://avatars.dicebear.com/api/adventurer-neutral/mail%40ashallendesign.co.uk.svg"
+              }
               sx={{ width: 55, height: 55 }}
             />
             <Link to={`/otherprofile/${job?.user?.[0]?._id}`}>
               <span className="text-gray-700 text-base">
-                &nbsp;&nbsp;{job?.user?.[0]?.username || "Unknown"}
+                &nbsp;&nbsp;
+                {job?.user?.[0]?.company || "Unknown"}
+                <br />
+                <p className="text-sm">
+                  &nbsp;&nbsp; Posted by :{" "}
+                  {job?.user?.[0]?.username || "Unknown"}
+                </p>
               </span>
             </Link>
           </div>
           <div className="mt-5 border rounded-md border-gray-300 p-3 bg-white">
-            <p className="text-sm text-gray-600 ">
+            <p className="text-sm text-gray-600 mb-2">
               <AccessTimeIcon /> {moment(job.postdate).format("MMMM DD, YYYY")}
+            </p>
+            <p className="text-sm text-gray-600 mb-2">
+              <AlarmIcon className="text-red-800 mr-1" />
+              {job?.deadline}
+            </p>
+            <p className="text-sm text-gray-600 mb-2">
+              <PaidIcon className="text-green-800 mr-1" />
+              {job.salary === "other"
+                ? job.specificSalary + " $/year"
+                : job.salary}
             </p>
           </div>
           <div className="flex place-content-between">
@@ -169,7 +189,7 @@ const removeLike = async (jobId) => {
                 <p className="text-lg text-blue-600 font-semibold mr-2">
                   {job?.likes?.length}
                 </p>{" "}
-                {job.likes && job.likes.includes(currentUser._id) ? (
+                {job.likes && job.likes.includes(currentUser?._id) ? (
                   <>
                     {" "}
                     <ThumbUpIcon

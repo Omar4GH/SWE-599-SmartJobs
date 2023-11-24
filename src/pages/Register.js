@@ -18,6 +18,7 @@ function Register() {
     birthdate: "",
     company: "",
     title: "",
+    profileImage:"",
     mailing:false,
     experience: [],
     education: [],

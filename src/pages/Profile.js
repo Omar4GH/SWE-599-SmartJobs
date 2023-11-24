@@ -149,6 +149,8 @@ const Profile = () => {
   const [firstname, setFirstname] = useState("");
   const [lastname, setLastname] = useState("");
   const [mailing, setMailing] = useState(false);
+  const [profileImage, setProfileImage] = useState(null); // Add state for profile image
+
   const updateProfile = async (e) => {
     e.preventDefault();
 
@@ -163,6 +165,7 @@ const Profile = () => {
           mailing: mailing,
           title: title || userInfo.title,
           company: company || userInfo.company,
+          profileImage: profileImage || userInfo.profileImage,
         })
         .then((response) => {
           setTrigger(!trigger);
@@ -222,7 +225,21 @@ const Profile = () => {
       console.error("Error:", error);
     }
   };
+  /////////////////////////////
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
 
+    if (file) {
+      const reader = new FileReader();
+
+      reader.onloadend = () => {
+        // Set the base64 representation of the image
+        setProfileImage(reader.result);
+      };
+
+      reader.readAsDataURL(file);
+    }
+  };
   ////////////////////////
   const [showMore, setShowMore] = useState({});
   const handleShowMore = (jobId) => {
@@ -231,6 +248,17 @@ const Profile = () => {
       [jobId]: !prevState[jobId],
     }));
   };
+  /////////////////////////////////
+  const [open, setOpen] = useState(false);
+
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+
   return (
     <div className="min-h-screen bg-slate-100 py-12 px-4 sm:px-6 lg:px-8">
       {currentUser ? (
@@ -256,9 +284,19 @@ const Profile = () => {
                 />
                 <div className="text-center justify-center">
                   <img
-                    src="https://avatars.dicebear.com/api/adventurer-neutral/mail%40ashallendesign.co.uk.svg"
+                    src={
+                      userInfo.profileImage ||
+                      "https://avatars.dicebear.com/api/adventurer-neutral/mail%40ashallendesign.co.uk.svg"
+                    }
                     alt="Profile Picture"
                     className="mx-auto h-24 w-24 rounded-full"
+                  />
+
+                  {/* Input for choosing an image */}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
                   />
                   <input
                     required
@@ -435,7 +473,10 @@ const Profile = () => {
                 />
                 <div className="text-center">
                   <img
-                    src="https://avatars.dicebear.com/api/adventurer-neutral/mail%40ashallendesign.co.uk.svg"
+                    src={
+                      userInfo.profileImage ||
+                      "https://avatars.dicebear.com/api/adventurer-neutral/mail%40ashallendesign.co.uk.svg"
+                    }
                     alt="Profile Picture"
                     className="mx-auto h-24 w-24 rounded-full"
                   />
@@ -582,7 +623,10 @@ const Profile = () => {
                                     </h1>
                                     <div className="flex text-sm items-center space-x-2">
                                       <img
-                                        src="https://media.istockphoto.com/id/1300845620/vector/user-icon-flat-isolated-on-white-background-user-symbol-vector-illustration.jpg?s=612x612&w=0&k=20&c=yBeyba0hUkh14_jgv1OKqIH0CCSWU_4ckRkAoy2p73o="
+                                        src={
+                                          job?.user?.[0].profileImage ||
+                                          "https://avatars.dicebear.com/api/adventurer-neutral/mail%40ashallendesign.co.uk.svg"
+                                        }
                                         alt="User Avatar"
                                         style={{
                                           width: "40px",
@@ -760,7 +804,10 @@ const Profile = () => {
                                     </h1>
                                     <div className="flex text-sm items-center space-x-2">
                                       <img
-                                        src="https://media.istockphoto.com/id/1300845620/vector/user-icon-flat-isolated-on-white-background-user-symbol-vector-illustration.jpg?s=612x612&w=0&k=20&c=yBeyba0hUkh14_jgv1OKqIH0CCSWU_4ckRkAoy2p73o="
+                                        src={
+                                          job?.user?.[0].profileImage ||
+                                          "https://avatars.dicebear.com/api/adventurer-neutral/mail%40ashallendesign.co.uk.svg"
+                                        }
                                         alt="User Avatar"
                                         style={{
                                           width: "40px",
@@ -794,36 +841,11 @@ const Profile = () => {
                                   <div className="flex items-center text-xs space-x-2">
                                     {job.likes && (
                                       <>
-                                        <Dropdown>
-                                          <MenuButton
-                                            slots={{ root: ThumbUpOffAlt }}
-                                            slotProps={{
-                                              root: {
-                                                variant: "outlined",
-                                                color: "neutral",
-                                              },
-                                            }}
-                                          >
-                                            <MoreVert />
-                                          </MenuButton>
-                                          <Menu>
-                                            {allUsers.map(
-                                              (user) =>
-                                                // Check if the user ID exists in job.likes
-                                                job.likes.includes(
-                                                  user._id
-                                                ) && (
-                                                  <MenuItem
-                                                    key={user._id}
-                                                    component={Link}
-                                                    to={`/otherprofile/${user._id}`}
-                                                  >
-                                                    {user.username}
-                                                  </MenuItem>
-                                                )
-                                            )}
-                                          </Menu>
-                                        </Dropdown>
+                                        <ThumbUpOffAlt
+                                          onClick={() => {
+                                            setOpen(!open);
+                                          }}
+                                        />
                                       </>
                                     )}
                                     {job?.likes.length}
@@ -833,6 +855,45 @@ const Profile = () => {
                                     className="cursor-pointer hover:text-red-800"
                                   />
                                 </div>
+                                {open && job?.likes?.length>0 ? (
+                                  <>
+                                    {" "}
+                                    <div className="my-1 rounded-xl shadow-2xl p-4 max-h-40 overflow-y-scroll overflow-x-hidden bg-white">
+                                      {allUsers.map(
+                                        (user) =>
+                                          job.likes.includes(user._id) && (
+                                            <Link
+                                            key={user._id}
+                                            to={`/otherprofile/${user._id}`}
+                                          >
+                                              <div
+                                                key={user._id}
+                                                className="flex items-center space-x-2 mb-2 w-fit p-1 border-solid border-black"
+                                              >
+                                                <img
+                                                  src={
+                                                    user?.profileImage ||
+                                                    "https://avatars.dicebear.com/api/adventurer-neutral/mail%40ashallendesign.co.uk.svg"
+                                                  }
+                                                  alt="User Avatar"
+                                                  style={{
+                                                    width: "40px",
+                                                    height: "40px",
+                                                    borderRadius: "50%",
+                                                    marginRight: 4,
+                                                  }}
+                                                />
+
+                                                {user.username}
+                                              </div>
+                                            </Link>
+                                          )
+                                      )}
+                                    </div>
+                                  </>
+                                ) : (
+                                  <></>
+                                )}
                                 <div className="mt-3">
                                   <div className="text-xs font-semibold">
                                     Tags
