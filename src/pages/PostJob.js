@@ -34,6 +34,7 @@ const PostJob = () => {
     location: "",
     position: "",
     tags: [], // Assuming tags are comma-separated
+    salary: "",
     active: true,
   });
 
@@ -42,15 +43,6 @@ const PostJob = () => {
     postdate: new Date().toISOString(),
     likes: [],
     ...(currentUser ? { uid: currentUser._id } : {}),
-  };
-
-  const handleCountryChange = (event, value) => {
-    setSelectedCountry(value || "");
-    setFormData({
-      ...formData,
-      location: value || "",
-    });
-    console.log(formData);
   };
 
   const handleInputChange = (e) => {
@@ -68,7 +60,7 @@ const PostJob = () => {
         ...formData,
         [name]: value === "true", // Convert the selected value to a boolean
       });
-    }else {
+    } else {
       setFormData({
         ...formData,
         [name]: value,
@@ -153,7 +145,20 @@ const PostJob = () => {
                   />
                 </div>
               </div>
-
+              <div className="mb-4">
+                <label htmlFor="deadline" className="block font-semibold mb-2">
+                  Application Deadline
+                </label>
+                <input
+                  type="date"
+                  id="deadline"
+                  name="deadline"
+                  className="w-1/6 p-2 border border-gray-300 rounded-md"
+                  required
+                  value={formData.deadline}
+                  onChange={handleInputChange}
+                />
+              </div>
               <div className="mb-4">
                 <label htmlFor="location" className="block font-semibold mb-2">
                   Location
@@ -192,7 +197,41 @@ const PostJob = () => {
                   onChange={handleInputChange}
                 />
               </div>
+              <div className="mb-4">
+                <label htmlFor="salary" className="block font-semibold mb-2">
+                  Salary
+                </label>
+                <select
+                  name="salary"
+                  className="w-1/5 p-2 border border-gray-300 rounded-md"
+                  value={formData.salary}
+                  onChange={handleInputChange}
+                >
+                  <option value="" disabled>
+                    Select Salary
+                  </option>
+                  <option value="Competitive Salary">Competitive Salary</option>
+                  <option value="Minimum Wage">Minimum Wage</option>
+                  <option value="Based on Experience">
+                    Based on Experience
+                  </option>
+                  <option value="other">Other</option>
+                  {/* Add other salary options as needed */}
+                </select>
 
+                {/* Conditionally render an input for specific salary if "Other" is selected */}
+                {formData.salary === "other" && (
+                  <Input
+                    type="number"
+                    id="specificSalary"
+                    name="specificSalary"
+                    placeholder="Enter Specific Salary, $ per Year"
+                    className="w-1/5 p-2 border border-gray-300 rounded-md mt-2"
+                    value={formData.specificsalary}
+                    onChange={handleInputChange}
+                  />
+                )}
+              </div>
               <div className="mb-4">
                 <label htmlFor="tags" className="block font-semibold mb-2">
                   Tags
