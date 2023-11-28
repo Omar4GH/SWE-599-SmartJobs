@@ -33,6 +33,7 @@ const PostJob = () => {
     description: "",
     location: "",
     position: "",
+    contract: "",
     tags: [], // Assuming tags are comma-separated
     salary: "",
     active: true,
@@ -145,19 +146,42 @@ const PostJob = () => {
                   />
                 </div>
               </div>
-              <div className="mb-4">
-                <label htmlFor="deadline" className="block font-semibold mb-2">
-                  Application Deadline
-                </label>
-                <input
-                  type="date"
-                  id="deadline"
-                  name="deadline"
-                  className="w-1/6 p-2 border border-gray-300 rounded-md"
-                  required
-                  value={formData.deadline}
-                  onChange={handleInputChange}
-                />
+              <div className="flex w-2/4 justify-between">
+                <div className="mb-4">
+                  <label
+                    htmlFor="deadline"
+                    className="block font-semibold mb-2"
+                  >
+                    Application Deadline
+                  </label>
+                  <input
+                    type="date"
+                    id="deadline"
+                    name="deadline"
+                    className="w-full p-2 border border-gray-300 rounded-md"
+                    required
+                    value={formData.deadline}
+                    onChange={handleInputChange}
+                  />
+                </div>
+                <div className="mb-4">
+                  <label
+                    htmlFor="deadline"
+                    className="block font-semibold mb-2"
+                  >
+                    Application URL
+                  </label>
+                  <input
+                    type="url"
+                    id="url"
+                    placeholder="Enter Application URL"
+                    name="url"
+                    className="w-full p-2 border border-gray-300 rounded-md"
+                    required
+                    value={formData.url}
+                    onChange={handleInputChange}
+                  />
+                </div>
               </div>
               <div className="mb-4">
                 <label htmlFor="location" className="block font-semibold mb-2">
@@ -178,24 +202,72 @@ const PostJob = () => {
                   ))}
                 </select>
               </div>
-
-              <div className="mb-4">
-                <label
-                  htmlFor="jobPosition"
-                  className="block font-semibold mb-2"
-                >
-                  Job Position
-                </label>
-                <Input
-                  type="text"
-                  id="position"
-                  name="position"
-                  placeholder="Enter Job Position"
-                  className="w-1/6 p-2 border border-gray-300 rounded-md"
-                  required
-                  value={formData.position}
-                  onChange={handleInputChange}
-                />
+              <div className="flex w-2/4 justify-between">
+                <div className="mb-4">
+                  <label
+                    htmlFor="jobPosition"
+                    className="block font-semibold mb-2"
+                  >
+                    Job Position
+                  </label>
+                  <Input
+                    type="text"
+                    id="position"
+                    name="position"
+                    placeholder="Enter Job Position"
+                    className="w-full p-2 border border-gray-300 rounded-md"
+                    required
+                    value={formData.position}
+                    onChange={handleInputChange}
+                  />
+                </div>
+                <div className="mb-4">
+                  <label
+                    htmlFor="jobPosition"
+                    className="block font-semibold mb-2"
+                  >
+                    Contract Type
+                  </label>
+                  <select
+                    name="contract"
+                    className="w-full p-2 border border-gray-300 rounded-md"
+                    value={formData.contract}
+                    required
+                    onChange={handleInputChange}
+                  >
+                    <option value="" disabled>
+                      Select Contract Type
+                    </option>
+                    <option value="Full Time">Full Time</option>
+                    <option value="Part Time">Part Time</option>
+                    <option value="Permanent Contract">
+                      Permanent Contract
+                    </option>
+                    <option value="Fixed-term">Fixed-term</option>
+                    <option value="Zero hour contract">
+                      Zero hour contract
+                    </option>
+                    <option value="Casual contract">Casual contract</option>
+                    <option value="Permanent contract">
+                      Permanent contract
+                    </option>
+                    <option value="Freelance contract">
+                      Freelance contract
+                    </option>
+                    <option value="Implied contracts">Implied contracts</option>
+                    <option value="Agency contracts">Agency contracts</option>
+                    <option value="Agency staff">Agency staff</option>
+                    <option value="Oral contracts">Oral contracts</option>
+                    <option value="Consulting agreement">
+                      Consulting agreement
+                    </option>
+                    <option value="Employing family">Employing family</option>
+                    <option value="Permanent">Permanent</option>
+                    <option value="Severance agreements">
+                      Severance agreements
+                    </option>
+                  </select>
+                </div>
               </div>
               <div className="mb-4">
                 <label htmlFor="salary" className="block font-semibold mb-2">

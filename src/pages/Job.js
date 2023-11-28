@@ -140,7 +140,8 @@ const Job = () => {
           className="w-2/3 p-4 bg-white rounded-lg my-6 shadow-md"
           style={{ overflowY: "auto" }}
         >
-          <h1 className="text-2xl font-semibold mb-16">{job.title}</h1>
+          <h1 className="text-2xl font-semibold mb-2">{job.title}</h1>
+          <h1 className="text-sm mb-10">{job.contract} - {job.position}</h1>
           <p
             className="text-lg text-gray-700"
             dangerouslySetInnerHTML={{ __html: job.description }}
@@ -273,7 +274,8 @@ const Job = () => {
             {" "}
             <Button
               component="a"
-              href="#as-link"
+              target="_blank"
+              href={job.url}
               startDecorator={<OpenInNew />}
             >
               Open in new tab

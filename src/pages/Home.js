@@ -34,9 +34,17 @@ const Home = () => {
                   </p>
                   <p
                     as="h1"
-                    className=" text-color3 lg:text-7xl md:text-5xl text-3xl font-medium"
+                    className=" text-color3 lg:text-7xl md:text-5xl text-3xl flex font-medium"
                   >
-                    {currentUser.username}
+                    {currentUser.username}{" "}
+                    <img
+                      className="h-24 w-24 ml-2 rounded-full"
+                      src={
+                        currentUser.profileImage ||
+                        "https://avatars.dicebear.com/api/adventurer-neutral/mail%40ashallendesign.co.uk.svg"
+                      }
+                      alt=""
+                    />
                   </p>
                   <p
                     as="p"
@@ -76,9 +84,17 @@ const Home = () => {
                   </p>
                   <p
                     as="h1"
-                    className=" text-color3 lg:text-7xl md:text-5xl text-3xl font-medium"
+                    className=" text-color3 lg:text-7xl md:text-5xl flex text-3xl font-medium"
                   >
                     {currentUser.username}
+                    <img
+                      className="h-24 w-24 ml-2 rounded-full"
+                      src={
+                        currentUser.profileImage ||
+                        "https://avatars.dicebear.com/api/adventurer-neutral/mail%40ashallendesign.co.uk.svg"
+                      }
+                      alt=""
+                    />
                   </p>
                   <p
                     as="p"
