@@ -20,6 +20,7 @@ function Register() {
     title: "",
     profileImage:"",
     mailing:false,
+    subscribed: [],
     experience: [],
     education: [],
   });

@@ -26,6 +26,8 @@ import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
 import BookmarkIcon from "@mui/icons-material/Bookmark";
 import BookmarkRemoveIcon from "@mui/icons-material/BookmarkRemove";
 import { Link } from "react-router-dom";
+import SettingsIcon from "@mui/icons-material/Settings";
+import PersonIcon from "@mui/icons-material/Person";
 import Dropdown from "@mui/joy/Dropdown";
 import Menu from "@mui/joy/Menu";
 import MenuButton from "@mui/joy/MenuButton";
@@ -175,7 +177,28 @@ const Profile = () => {
       console.log(err);
     }
   };
+  ////////////MAILING/////////////
+  const handleChangeMailing = async (e) => {
+    e.preventDefault();
+
+    try {
+      await _axios
+        .put(`users/${currentUser._id}/mailing`, {
+          mailing: !mailing,
+        })
+        .then((response) => {
+          setTrigger(!trigger);
+        });
+    } catch (err) {
+      console.log(err);
+    }
+  };
   /////////////////////////
+
+  /////////////////////// TABS  ////
+  const [tab, setTab] = useState(1);
+
+  ///////////////////////////////////
   const updateJobActive = async (jobId, newActiveStatus) => {
     try {
       const response = await _axios.put(`/jobs/${jobId}/job-active`, {
@@ -348,16 +371,7 @@ const Profile = () => {
                     @{currentUser.username}
                   </p>
                 </div>
-                <select
-                  className="w-fit border rounded-lg shadow-md"
-                  value={userInfo.mailing ? "true" : "false"}
-                  onChange={(e) => {
-                    setMailing(e.target.value === "true");
-                  }}
-                >
-                  <option value="true">I want to Receive Emails</option>
-                  <option value="false">No emails</option>
-                </select>
+
                 <div className="mt-5">
                   <h3 className="text-lg font-medium text-gray-900">
                     Profile Information
@@ -498,31 +512,55 @@ const Profile = () => {
                     @{currentUser.username}
                   </p>
                 </div>
-                <div className="mt-5">
-                  <h3 className="text-lg font-medium text-gray-900">
-                    Profile Information
-                  </h3>
-                  <dl className="mt-2 border-t border-b border-gray-200 grid grid-cols-2 gap-x-4 gap-y-2">
-                    <div className="py-1">Birthdate</div>
-                    <div className="py-1">Country</div>
-                    <div className="text-sm text-gray-500">
-                      {userInfo.birthdate}
-                    </div>
-                    <div className="text-sm text-gray-500">
-                      {userInfo.country}
-                    </div>
-                  </dl>
-                  <div className="mt-5">
-                    <h3 className="text-lg font-medium text-gray-900">Bio</h3>
-                    <p className="mt-2 text-sm text-gray-500">{userInfo.bio}</p>
+                <div className="text-center flex justify-center my-2  ">
+                  <div
+                    onClick={() => {
+                      setTab(1);
+                    }}
+                    className={`mx-3 cursor-pointer ${tab === 1 ? 'bg-gray-200 rounded-xl' : ''}`}
+                  >
+                    <PersonIcon fontSize="large" />
                   </div>
-                  {currentUser.type === "Job Seeker" ? (
-                    <>
+                  <div
+                    onClick={() => {
+                      setTab(2);
+                    }}
+                    className={`mx-3 cursor-pointer ${tab === 2 ? 'bg-gray-200 rounded-xl' : ''}`}
+                  >
+                    <SettingsIcon fontSize="large" />
+                  </div>
+                </div>
+                {tab === 1 ? (
+                  <>
+                    <div className="mt-5">
+                      <h3 className="text-lg font-medium text-gray-900">
+                        Profile Information
+                      </h3>
+                      <dl className="mt-2 border-t border-b border-gray-200 grid grid-cols-2 gap-x-4 gap-y-2">
+                        <div className="py-1">Birthdate</div>
+                        <div className="py-1">Country</div>
+                        <div className="text-sm text-gray-500">
+                          {userInfo.birthdate}
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          {userInfo.country}
+                        </div>
+                      </dl>
                       <div className="mt-5">
                         <h3 className="text-lg font-medium text-gray-900">
-                          Education
+                          Bio
                         </h3>
-
+                        <p className="mt-2 text-sm text-gray-500">
+                          {userInfo.bio}
+                        </p>
+                      </div>
+                      {currentUser.type === "Job Seeker" ? (
+                        <>
+                          <div className="mt-5">
+                            <h3 className="text-lg font-medium text-gray-900">
+                              Education
+                            </h3>
+                            {/*
                         <div className="border text-xs rounded-lg p-2 bg-slate-100 mb-1">
                           <div className="flex justify-end">
                             <DeleteIcon fontSize="small" />
@@ -552,13 +590,14 @@ const Profile = () => {
                               </h3>
                               <p>Turkey</p>
                             </div>
+                          </div> 
+                        </div>*/}
                           </div>
-                        </div>
-                      </div>
-                      <div className="mt-5">
-                        <h3 className="text-lg font-medium text-gray-900">
-                          Experience
-                        </h3>
+                          <div className="mt-5">
+                            <h3 className="text-lg font-medium text-gray-900">
+                              Experience
+                            </h3>
+                            {/* 
                         <div className="border text-xs rounded-lg p-2 bg-slate-100 mb-1">
                           <div className="flex justify-end">
                             <DeleteIcon fontSize="small" />
@@ -589,13 +628,68 @@ const Profile = () => {
                               <p>dasdasdasd</p>
                             </div>
                           </div>
-                        </div>
+                        </div>*/}
+                          </div>
+                        </>
+                      ) : (
+                        <></>
+                      )}
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    {" "}
+                    <div className="mt-5">
+                      <h3 className="text-lg font-medium text-gray-900">
+                        Profile Settings
+                      </h3>
+                      <dl className="mt-2 border-t border-b border-gray-200 grid grid-cols-2 gap-x-4 gap-y-2"></dl>
+                      <div className="my-2">
+                        I want to receive Emails :
+                        <Switch
+                          checked={userInfo.mailing}
+                          onChange={handleChangeMailing}
+                          inputProps={{ "aria-label": "controlled" }}
+                        />
                       </div>
-                    </>
-                  ) : (
-                    <></>
-                  )}
-                </div>
+                      <dl className="mt-2 border-t border-b border-gray-200 grid grid-cols-2 gap-x-4 gap-y-2"></dl>
+                      {userInfo.subscribed ? (
+                        <>
+                          <div className="my-2">
+                            Subscribed Search Presets :
+                            <div>
+                              {userInfo.subscribed.map((sub, index) => (
+                                <>
+                                  <div
+                                    key={index}
+                                    className="transition w-fit h-fit duration-300 ease-in-out transform hover:scale-103 hover:shadow-2xl mb-5 bg-gradient-to-b  text-gray-900 from-gray-50 to-gray-300  p-6 rounded-lg shadow-xl  mt-8 border-solid border-black"
+                                  >
+                                    <b>Preset {index + 1} </b>
+                                    <div>
+                                      <b>Title :</b> {sub[0].title}
+                                    </div>
+                                    <div>
+                                      <b>Tags : </b>
+                                      {sub[0].tags}
+                                    </div>
+                                    <div>
+                                      <b>Location :</b> {sub[0].location}
+                                    </div>
+                                    <div>
+                                      <b>Contract Type :</b> {sub[0].contract}
+                                    </div>
+                                  </div>
+                                </>
+                              ))}
+                            </div>
+                          </div>
+                        </>
+                      ) : (
+                        <></>
+                      )}
+                    </div>
+                  </>
+                )}
                 {currentUser.type === "Job Seeker" ? (
                   <>
                     <div className="mt-5">
@@ -632,6 +726,7 @@ const Profile = () => {
                                           width: "40px",
                                           height: "40px",
                                           borderRadius: "50%",
+                                          marginRight: 5,
                                         }}
                                       />
                                       {job?.user?.[0]?.username || "Unknown"}
@@ -855,7 +950,7 @@ const Profile = () => {
                                     className="cursor-pointer hover:text-red-800"
                                   />
                                 </div>
-                                {open && job?.likes?.length>0 ? (
+                                {open && job?.likes?.length > 0 ? (
                                   <>
                                     {" "}
                                     <div className="my-1 rounded-xl shadow-2xl p-4 max-h-40 overflow-y-scroll overflow-x-hidden bg-white">
@@ -863,9 +958,9 @@ const Profile = () => {
                                         (user) =>
                                           job.likes.includes(user._id) && (
                                             <Link
-                                            key={user._id}
-                                            to={`/otherprofile/${user._id}`}
-                                          >
+                                              key={user._id}
+                                              to={`/otherprofile/${user._id}`}
+                                            >
                                               <div
                                                 key={user._id}
                                                 className="flex items-center space-x-2 mb-2 w-fit p-1 border-solid border-black"
