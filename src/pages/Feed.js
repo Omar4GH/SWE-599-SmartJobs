@@ -46,11 +46,20 @@ const Feed = () => {
   const [trigger, setTrigger] = useState(false);
   const [allUsers, setAllUsers] = useState([]);
   const [titleFilter, setTitleFilter] = useState("");
+  const [selectedCountry, setSelectedCountry] = useState("");
+  const [tagFilter, setTagFilter] = useState("");
+  const [contractFilter, setContractFilter] = useState("");
 
   const fetchData = async () => {
     try {
       const res = await _axios.get(
-        `jobs?title=${encodeURIComponent(titleFilter)}`
+        `jobs?title=${encodeURIComponent(
+          titleFilter
+        )}&location=${encodeURIComponent(
+          selectedCountry
+        )}&tags=${encodeURIComponent(tagFilter)}&contract=${encodeURIComponent(
+          contractFilter
+        )}`
       );
       setJobs(res.data);
       console.log(res.data);
@@ -71,7 +80,7 @@ const Feed = () => {
     fetchData();
     getUser();
     getUsers();
-  }, [trigger, titleFilter]);
+  }, [trigger, titleFilter, selectedCountry, tagFilter, contractFilter]);
 
   const updateSavedJobs = async (jobId) => {
     try {
@@ -162,7 +171,7 @@ const Feed = () => {
   };
 
   ///////////////// SEARCH ///////////////////////////
-  const [selectedCountry, setSelectedCountry] = useState("");
+
   const [yearFilter, setYearFilter] = useState("");
   const [countries, setCountries] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
@@ -187,12 +196,57 @@ const Feed = () => {
       setUsernameFilter("");
     }
   };
-  const handleUsernameChange = (e) => {
-    setUsernameFilter(e.target.value);
+  const handleTagChange = (e) => {
+    setTagFilter(e.target.value);
+  };
+  const handleContractChange = (e) => {
+    setContractFilter(e.target.value);
   };
   const handleTitleChange = (e) => {
     setTitleFilter(e.target.value);
   };
+  
+  const handleClearFilters = (e) => {
+    setTitleFilter("");
+    setContractFilter("");
+    setTagFilter("");
+    setSelectedCountry("");
+  };
+  useEffect(() => {
+    fetch("https://countriesnow.space/api/v0.1/countries")
+      .then((response) => response.json())
+      .then((data) => {
+        console.log(data.data); // Log the response data
+        setCountries(data.data.map((country) => country.country));
+      })
+      .catch((error) => {
+        console.error("Error fetching countries:", error);
+      });
+  }, []);
+
+  const saveSubscribedPreset = async () => {
+    try {
+      const response = await _axios.post(
+        `/users/${currentUser._id}/subscribe-search`,
+      { subscribed: [
+        {
+          title: titleFilter,
+          tags: tagFilter,
+          location: selectedCountry,
+          contract: contractFilter,
+        },
+      ],});
+      if (response.status === 200) {
+        console.log("Subscribed successfully");
+        setTrigger(!trigger);
+      } else {
+        console.log("User not found or error occurred.");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+
   //////////////////// SEARCH END  /////////////////////
 
   const getGradientColors = (category) => {
@@ -234,7 +288,7 @@ const Feed = () => {
           >
             <SearchIcon fontSize="large" className="hover:text-green-600" />
           </AccordionSummary>
-          <AccordionDetails className="bg-white p-6 rounded-lg shadow-xl border-solid border-black">
+          <AccordionDetails className="bg-white p-6 w-full rounded-lg shadow-xl border-solid border-black">
             Search Still under Development
             <div className="flex items-center">
               <div className="relative mr-4">
@@ -253,72 +307,19 @@ const Feed = () => {
                   type="text"
                   className="pl-8 pr-3 py-2 w-72 border rounded-md"
                   placeholder="Search by tags"
+                  value={tagFilter}
+                  onChange={handleTagChange}
                 />
                 <TagIcon className="w-4 h-4 absolute top-3 left-2 text-gray-400" />
               </div>
-              {allUsers ? (
-                <>
-                  <Autocomplete
-                    className="w-72 bg-white rounded-md"
-                    options={allUsers}
-                    getOptionLabel={(user) => user.username || ""}
-                    value={allUsers.find((option) => option.id === userFilter)}
-                    onChange={handleUserChange}
-                    onInputChange={handleUsernameChange}
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        label={
-                          <div className="flex items-center">
-                            <PersonIcon />
-                            <span>Search by User</span>
-                          </div>
-                        }
-                        variant="outlined"
-                        InputProps={{
-                          ...params.InputProps,
-                          endAdornment: (
-                            <React.Fragment>
-                              {params.InputProps.endAdornment}
-                            </React.Fragment>
-                          ),
-                        }}
-                      />
-                    )}
-                  />
-                </>
-              ) : (
-                <></>
-              )}
-            </div>
-            <div className="flex items-center mr-4 ">
-             {/*  <div className="relative mb-5 mr-4 " style={{ zIndex: 9999 }}>
-                <DatePicker
-                  selected={yearFilter}
-                  onChange={(date) => handleYearChange(date)}
-                  dateFormat="yyyy"
-                  showYearPicker
-                  className="pl-8 pr-3 py-2 w-72 border rounded-md"
-                  placeholderText="Select a year"
-                  value={yearFilter ? yearFilter.toString() : ""}
-                />
-                <CalendarIcon className="w-4 h-4 absolute top-3 left-2 text-gray-400" />
-                {yearFilter && (
-                  <button
-                    className="absolute top-3 right-2 text-gray-400"
-                    onClick={handleClearYear}
-                  >
-                    Clear
-                  </button>
-                )}
-              </div>
-*/}
+            </div><div className="mb-4 mt-8 flex">
+            <div className="flex items-center mr-16 ">
               <Autocomplete
                 disablePortal
                 id="combo-box-demo"
                 options={countries}
                 sx={{ width: 250 }}
-                className="bg-white"
+                className="bg-white mt-2"
                 value={selectedCountry}
                 onChange={handleCountryChange}
                 renderInput={(params) => (
@@ -326,6 +327,51 @@ const Feed = () => {
                 )}
               />
             </div>
+            <div>
+              <label htmlFor="jobPosition" className="block font-semibold mb-2">
+                Contract Type
+              </label>
+              <select
+                name="contract"
+                className="w-full p-2 border border-gray-300 rounded-md"
+                value={contractFilter}
+                required
+                onChange={handleContractChange}
+              >
+                <option value="" disabled>
+                  search by Contract Type
+                </option>
+                <option value="" >
+                  none
+                </option>
+                <option value="Full Time">Full Time</option>
+                <option value="Part Time">Part Time</option>
+                <option value="Permanent Contract">Permanent Contract</option>
+                <option value="Fixed-term">Fixed-term</option>
+                <option value="Zero hour contract">Zero hour contract</option>
+                <option value="Casual contract">Casual contract</option>
+                <option value="Permanent contract">Permanent contract</option>
+                <option value="Freelance contract">Freelance contract</option>
+                <option value="Implied contracts">Implied contracts</option>
+                <option value="Agency contracts">Agency contracts</option>
+                <option value="Agency staff">Agency staff</option>
+                <option value="Oral contracts">Oral contracts</option>
+                <option value="Consulting agreement">
+                  Consulting agreement
+                </option>
+                <option value="Employing family">Employing family</option>
+                <option value="Permanent">Permanent</option>
+                <option value="Severance agreements">
+                  Severance agreements
+                </option>
+              </select></div>
+            </div>
+            <button onClick={handleClearFilters} className=" px-4 py-2 mt-2 mr-5 bg-red-800 text-white transition-colors duration-200 transform rounded-md hover:bg-red-400 focus:outline-none focus:bg-red-300">
+              Clear Search
+            </button>
+            <button onClick={saveSubscribedPreset} className=" px-4 py-2 mt-2 bg-blue-950 text-white transition-colors duration-200 transform rounded-md hover:bg-blue-600 focus:outline-none focus:bg-blue-300">
+              Save Preset
+            </button>
           </AccordionDetails>
         </Accordion>
       </div>
@@ -375,7 +421,7 @@ const Feed = () => {
                       </div>
                     </div>
                     <div className="text-base font-medium mb-2">
-                      {job?.position}
+                      {job?.contract} - {job?.position}
                     </div>
                     <div
                       className="mb-4 text-base text-black"
