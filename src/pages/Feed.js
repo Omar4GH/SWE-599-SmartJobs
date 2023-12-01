@@ -205,7 +205,7 @@ const Feed = () => {
   const handleTitleChange = (e) => {
     setTitleFilter(e.target.value);
   };
-  
+
   const handleClearFilters = (e) => {
     setTitleFilter("");
     setContractFilter("");
@@ -228,14 +228,17 @@ const Feed = () => {
     try {
       const response = await _axios.post(
         `/users/${currentUser._id}/subscribe-search`,
-      { subscribed: [
         {
-          title: titleFilter,
-          tags: tagFilter,
-          location: selectedCountry,
-          contract: contractFilter,
-        },
-      ],});
+          subscribed: [
+            {
+              title: titleFilter,
+              tags: tagFilter,
+              location: selectedCountry,
+              contract: contractFilter,
+            },
+          ],
+        }
+      );
       if (response.status === 200) {
         console.log("Subscribed successfully");
         setTrigger(!trigger);
@@ -270,6 +273,49 @@ const Feed = () => {
     };
 
     return categoryColors[category] || "from-blue-50 to-gray-50"; // Default to gray if category not found
+  };
+
+  const [searchChipToggles, setSearchChipToggles] = useState({
+    contract: false,
+    country: false,
+    tags: false,
+  });
+
+  const chipSearch = (filter, label) => {
+    if (searchChipToggles[filter]) {
+      switch (filter) {
+        case "contract":
+          setContractFilter("");
+          break;
+        case "country":
+          setSelectedCountry("");
+          break;
+        case "tags":
+          setTagFilter("");
+          break;
+        default:
+          break;
+      }
+    } else {
+      switch (filter) {
+        case "contract":
+          setContractFilter(label);
+          break;
+        case "country":
+          setSelectedCountry(label);
+          break;
+        case "tags":
+          setTagFilter(label);
+          break;
+        default:
+          break;
+      }
+    }
+
+    setSearchChipToggles((prevToggles) => ({
+      ...prevToggles,
+      [filter]: !prevToggles[filter],
+    }));
   };
 
   return (
@@ -312,68 +358,105 @@ const Feed = () => {
                 />
                 <TagIcon className="w-4 h-4 absolute top-3 left-2 text-gray-400" />
               </div>
-            </div><div className="mb-4 mt-8 flex">
-            <div className="flex items-center mr-16 ">
-              <Autocomplete
-                disablePortal
-                id="combo-box-demo"
-                options={countries}
-                sx={{ width: 250 }}
-                className="bg-white mt-2"
-                value={selectedCountry}
-                onChange={handleCountryChange}
-                renderInput={(params) => (
-                  <TextField {...params} label="Countries" />
-                )}
-              />
             </div>
-            <div>
-              <label htmlFor="jobPosition" className="block font-semibold mb-2">
-                Contract Type
-              </label>
-              <select
-                name="contract"
-                className="w-full p-2 border border-gray-300 rounded-md"
-                value={contractFilter}
-                required
-                onChange={handleContractChange}
-              >
-                <option value="" disabled>
-                  search by Contract Type
-                </option>
-                <option value="" >
-                  none
-                </option>
-                <option value="Full Time">Full Time</option>
-                <option value="Part Time">Part Time</option>
-                <option value="Permanent Contract">Permanent Contract</option>
-                <option value="Fixed-term">Fixed-term</option>
-                <option value="Zero hour contract">Zero hour contract</option>
-                <option value="Casual contract">Casual contract</option>
-                <option value="Permanent contract">Permanent contract</option>
-                <option value="Freelance contract">Freelance contract</option>
-                <option value="Implied contracts">Implied contracts</option>
-                <option value="Agency contracts">Agency contracts</option>
-                <option value="Agency staff">Agency staff</option>
-                <option value="Oral contracts">Oral contracts</option>
-                <option value="Consulting agreement">
-                  Consulting agreement
-                </option>
-                <option value="Employing family">Employing family</option>
-                <option value="Permanent">Permanent</option>
-                <option value="Severance agreements">
-                  Severance agreements
-                </option>
-              </select></div>
+            <div className="mb-4 mt-8 flex">
+              <div className="flex items-center mr-16 ">
+                <Autocomplete
+                  disablePortal
+                  id="combo-box-demo"
+                  options={countries}
+                  sx={{ width: 250 }}
+                  className="bg-white mt-2"
+                  value={selectedCountry}
+                  onChange={handleCountryChange}
+                  renderInput={(params) => (
+                    <TextField {...params} label="Countries" />
+                  )}
+                />
+              </div>
+              <div>
+                <label
+                  htmlFor="jobPosition"
+                  className="block font-semibold mb-2"
+                >
+                  Contract Type
+                </label>
+                <select
+                  name="contract"
+                  className="w-full p-2 border border-gray-300 rounded-md"
+                  value={contractFilter}
+                  required
+                  onChange={handleContractChange}
+                >
+                  <option value="" disabled>
+                    search by Contract Type
+                  </option>
+                  <option value="">none</option>
+                  <option value="Full Time">Full Time</option>
+                  <option value="Part Time">Part Time</option>
+                  <option value="Permanent Contract">Permanent Contract</option>
+                  <option value="Fixed-term">Fixed-term</option>
+                  <option value="Zero hour contract">Zero hour contract</option>
+                  <option value="Casual contract">Casual contract</option>
+                  <option value="Permanent contract">Permanent contract</option>
+                  <option value="Freelance contract">Freelance contract</option>
+                  <option value="Implied contracts">Implied contracts</option>
+                  <option value="Agency contracts">Agency contracts</option>
+                  <option value="Agency staff">Agency staff</option>
+                  <option value="Oral contracts">Oral contracts</option>
+                  <option value="Consulting agreement">
+                    Consulting agreement
+                  </option>
+                  <option value="Employing family">Employing family</option>
+                  <option value="Permanent">Permanent</option>
+                  <option value="Severance agreements">
+                    Severance agreements
+                  </option>
+                </select>
+              </div>
             </div>
-            <button onClick={handleClearFilters} className=" px-4 py-2 mt-2 mr-5 bg-red-800 text-white transition-colors duration-200 transform rounded-md hover:bg-red-400 focus:outline-none focus:bg-red-300">
+            <button
+              onClick={handleClearFilters}
+              className=" px-4 py-2 mt-2 mr-5 bg-red-800 text-white transition-colors duration-200 transform rounded-md hover:bg-red-400 focus:outline-none focus:bg-red-300"
+            >
               Clear Search
             </button>
-            <button onClick={saveSubscribedPreset} className=" px-4 py-2 mt-2 bg-blue-950 text-white transition-colors duration-200 transform rounded-md hover:bg-blue-600 focus:outline-none focus:bg-blue-300">
+            <button
+              onClick={saveSubscribedPreset}
+              className=" px-4 py-2 mt-2 bg-blue-950 text-white transition-colors duration-200 transform rounded-md hover:bg-blue-600 focus:outline-none focus:bg-blue-300"
+            >
               Save Preset
             </button>
           </AccordionDetails>
         </Accordion>
+      </div>
+      <div className="w-2/4 flex flex-row justify-between">
+        <Chip
+          className="w-fit feed-chip mt-2 mr-2"
+          label="Full Time"
+          variant={`${searchChipToggles.contract ? "filled" : "outlined"}`}
+          size="medium"
+          color="success"
+          onClick={() => chipSearch("contract", "Full Time")}
+        />
+
+        <Chip
+          className="w-fit feed-chip mt-2 mr-2"
+          label="Turkey"
+          variant={`${searchChipToggles.country ? "filled" : "outlined"}`}
+          size="medium"
+          color="success"
+          onClick={() => chipSearch("country", "Turkey")}
+        />
+
+        <Chip
+          className="w-fit feed-chip mt-2 mr-2"
+          label="Junior"
+          variant={`${searchChipToggles.tags ? "filled" : "outlined"}`}
+          size="medium"
+          color="success"
+          onClick={() => chipSearch("tags", "Junior")}
+        />
       </div>
 
       {jobs ? (
