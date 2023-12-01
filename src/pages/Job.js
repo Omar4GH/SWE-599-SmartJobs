@@ -31,6 +31,32 @@ const Job = () => {
   const jobId = location.pathname.split("/")[2];
   const [job, setJob] = useState({});
 
+
+  useEffect(async () => {
+    if (currentUser) {
+      try {
+        const response = await _axios.post(
+          `/activity/`,
+          {
+            action: "visited",
+            userid: currentUser._id,
+            jobid: jobId,
+          }
+        );
+  
+        if (response.status === 200) {
+          console.log("Activity recorded successfully");
+          
+        } else {
+          console.log("User not found or error occurred.");
+        }
+      } catch (error) {
+        console.error("Error recording activity:", error);
+      }
+    }
+  }, []);
+  
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -44,6 +70,7 @@ const Job = () => {
     fetchData();
     getUser();
   }, [jobId, trigger]);
+
   const [showMore, setShowMore] = useState({});
   const handleShowMore = (jobId) => {
     setShowMore((prevState) => ({
