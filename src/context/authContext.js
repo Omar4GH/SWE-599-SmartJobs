@@ -20,11 +20,21 @@ export const AuthContextProvider = ({ children }) => {
     setCurrentUser(null);
   };
 
+  const handleTokenLogin = async (token) => {
+    try {
+      const res = await _axios.post("auth/token-login", { token });
+      setCurrentUser(res.data);
+      console.log("Looged with Token :", res.data);
+    } catch (error) {
+      console.error("Error during token login:", error);
+    }
+  };
+
   useEffect(() => {
     localStorage.setItem("ls_user", JSON.stringify(currentUser));
   }, [currentUser]);
   return (
-    <AuthContext.Provider value={{ currentUser, login, logout }}>
+    <AuthContext.Provider value={{ currentUser, login, logout,handleTokenLogin }}>
       {children}
     </AuthContext.Provider>
   );

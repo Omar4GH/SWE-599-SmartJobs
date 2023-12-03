@@ -24,6 +24,7 @@ import {
 import { AuthContext } from "../context/authContext";
 const Job = () => {
   const { currentUser } = useContext(AuthContext);
+  const { handleTokenLogin } = useContext(AuthContext);
   const [trigger, setTrigger] = useState(false);
 
   const location = useLocation();
@@ -31,7 +32,21 @@ const Job = () => {
   const jobId = location.pathname.split("/")[2];
   const [job, setJob] = useState({});
 
+  useEffect(() => {
+    // Extract the token from the URL
+    const params = new URLSearchParams(location.search);
+    const token = params.get("token");
+    console.log("Got TOKEN");
+    // Call handleTokenLogin with the extracted token
+    if (token) {
+      console.log("Looging TOKEN");
+      handleTokenLogin(token);
+    }
 
+    // Your existing code...
+    // ...
+  }, []);
+  console.log("Looging TOKEN");
   useEffect(async () => {
     if (currentUser) {
       try {
