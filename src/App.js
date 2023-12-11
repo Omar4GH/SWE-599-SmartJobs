@@ -5,13 +5,13 @@ import Feed from './pages/Feed';
 import Home from './pages/Home';
 import Profile from './pages/Profile';
 import Navbar from './components/Navbar';
-import TestPage2 from './pages/TestPage2';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import PostJob from './pages/PostJob';
 import Footer from './components/Footer';
 import Job from './pages/Job';
 import OtherProfile from './pages/OtherProfile';
+import About from './pages/About';
 
 function App() {
   return (
@@ -21,7 +21,7 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/feed" element={<Feed />} />
-        <Route path="/testpage2" element={<TestPage2 />} />
+        <Route path="/about" element={<About />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/postjob" element={<PostJob />} />

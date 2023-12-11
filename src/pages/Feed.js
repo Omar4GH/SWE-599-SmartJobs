@@ -36,9 +36,15 @@ import Accordion from "@mui/material/Accordion";
 import DatePicker from "react-datepicker";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
+import defaultAvatar from "../assets/default-avatar.jpg"
+import { useLocation } from "react-router-dom";
+
 
 const Feed = () => {
   const { currentUser } = useContext(AuthContext);
+
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
 
   const [jobs, setJobs] = useState(null);
   const [liked, setLiked] = useState(false);
@@ -49,6 +55,19 @@ const Feed = () => {
   const [selectedCountry, setSelectedCountry] = useState("");
   const [tagFilter, setTagFilter] = useState("");
   const [contractFilter, setContractFilter] = useState("");
+
+  useEffect(() => {
+    // Extract parameters from URL and update state variables
+    const titleParam = queryParams.get("title") || "";
+    const tagsParam = queryParams.get("tags") || "";
+    const locationParam = queryParams.get("location") || "";
+    const contractParam = queryParams.get("contract") || "";
+
+    setTitleFilter(titleParam);
+    setTagFilter(tagsParam);
+    setSelectedCountry(locationParam);
+    setContractFilter(contractParam);
+  }, [location.search]);
 
   const fetchData = async () => {
     try {
@@ -485,7 +504,7 @@ const Feed = () => {
                         <img
                           src={
                             job?.user?.[0].profileImage ||
-                            "https://avatars.dicebear.com/api/adventurer-neutral/mail%40ashallendesign.co.uk.svg"
+                            defaultAvatar
                           }
                           alt="User Avatar"
                           style={{

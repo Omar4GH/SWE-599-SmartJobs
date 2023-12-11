@@ -25,6 +25,7 @@ import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import BookmarkIcon from "@mui/icons-material/Bookmark";
 import BookmarkRemoveIcon from "@mui/icons-material/BookmarkRemove";
 import { Link, useLocation } from "react-router-dom";
+import defaultAvatar from "../assets/default-avatar.jpg"
 
 const OtherProfile = () => {
   const { currentUser } = useContext(AuthContext);
@@ -175,7 +176,7 @@ const OtherProfile = () => {
                 <img
                     src={
                       userInfo.profileImage ||
-                      "https://avatars.dicebear.com/api/adventurer-neutral/mail%40ashallendesign.co.uk.svg"
+                      defaultAvatar
                     } alt="Profile Picture"
                   className="mx-auto h-24 w-24 rounded-full"
                 />
@@ -323,7 +324,7 @@ const OtherProfile = () => {
                                     <img
                                         src={
                                           job?.user?.[0].profileImage ||
-                                          "https://avatars.dicebear.com/api/adventurer-neutral/mail%40ashallendesign.co.uk.svg"
+                                          defaultAvatar
                                         } alt="User Avatar"
                                       style={{
                                         width: "40px",

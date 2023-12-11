@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from "react";
 import _axios from "../api/_axios";
 import { AuthContext } from "../context/authContext";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import Input from "@mui/joy/Input";
 import Autocomplete from "@mui/material/Autocomplete";
 import { TextField } from "@material-ui/core";
@@ -10,12 +10,13 @@ import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 const PostJob = () => {
   const { currentUser } = useContext(AuthContext);
+  const state = useLocation().state;
   const navigate = useNavigate();
 
   const [err, setError] = useState(null);
 
   const [countries, setCountries] = useState([]);
-  const [selectedCountry, setSelectedCountry] = useState("");
+  const [selectedCountry, setSelectedCountry] = useState(state?.location || "");
   useEffect(() => {
     fetch("https://countriesnow.space/api/v0.1/countries")
       .then((response) => response.json())
@@ -29,13 +30,16 @@ const PostJob = () => {
   }, []);
 
   const [formData, setFormData] = useState({
-    title: "",
-    description: "",
-    location: "",
-    position: "",
-    contract: "",
-    tags: [], // Assuming tags are comma-separated
-    salary: "",
+    title: state?.title || "",
+    description: state?.description || "",
+    location: state?.location || "",
+    position: state?.position || "",
+    contract: state?.contract || "",
+    specificsalary: state?.specificsalary || "",
+    deadline: state?.deadline || "",
+    url: state?.url || "",
+    tags: state?.tags || [], // Assuming tags are comma-separated
+    salary: state?.salary || "",
     active: true,
   });
 
@@ -78,7 +82,9 @@ const PostJob = () => {
   const submit = async (e) => {
     e.preventDefault();
     try {
-      await _axios.post("/jobs/", jobData);
+      state
+        ? await _axios.put(`/jobs/${state._id}`, jobData)
+        : await _axios.post("/jobs/", jobData);
       navigate("/feed");
     } catch (err) {
       setError(err.response.data);

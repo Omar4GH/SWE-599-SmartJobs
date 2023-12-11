@@ -12,6 +12,7 @@ import BookmarkRemoveIcon from "@mui/icons-material/BookmarkRemove";
 import Button from "@mui/joy/Button";
 import IconButton from "@mui/joy/IconButton";
 import OpenInNew from "@mui/icons-material/OpenInNew";
+import Edit from "@mui/icons-material/Edit";
 import AlarmIcon from "@mui/icons-material/Alarm";
 import PaidIcon from "@mui/icons-material/Paid";
 import {
@@ -46,22 +47,19 @@ const Job = () => {
     // Your existing code...
     // ...
   }, []);
+
   console.log("Looging TOKEN");
-  useEffect(async () => {
+  useEffect( () => {
     if (currentUser) {
       try {
-        const response = await _axios.post(
-          `/activity/`,
-          {
-            action: "visited",
-            userid: currentUser._id,
-            jobid: jobId,
-          }
-        );
-  
+        const response =  _axios.post(`/activity/`, {
+          action: "visited",
+          userid: currentUser._id,
+          jobid: jobId,
+        });
+
         if (response.status === 200) {
           console.log("Activity recorded successfully");
-          
         } else {
           console.log("User not found or error occurred.");
         }
@@ -69,32 +67,21 @@ const Job = () => {
         console.error("Error recording activity:", error);
       }
     }
-  }, []);
-  
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const res = await _axios.get(`jobs/${jobId}`);
-        setJob(res.data);
-        console.log(res.data);
-      } catch (err) {
-        console.log(err);
-      }
+    return () => {
+      // Cleanup code if needed
     };
-    fetchData();
-    getUser();
-  }, [jobId, trigger]);
+  }, []);
 
-  const [showMore, setShowMore] = useState({});
-  const handleShowMore = (jobId) => {
-    setShowMore((prevState) => ({
-      ...prevState,
-      [jobId]: !prevState[jobId],
-    }));
+  const fetchData = async () => {
+    try {
+      const res = await _axios.get(`jobs/${jobId}`);
+      setJob(res.data);
+      console.log(res.data);
+    } catch (err) {
+      console.log(err);
+    }
   };
 
-  /////////////////////////////////////////////////////////////
   const [savedPosts, setSavedPosts] = useState([]);
   const getUser = async () => {
     try {
@@ -106,6 +93,14 @@ const Job = () => {
       console.log(err);
     }
   };
+  useEffect(() => {
+    fetchData();
+    getUser();
+    return () => {
+      // Cleanup code if needed
+    };
+  }, [jobId, trigger]);
+
 
   const updateSavedJobs = async (jobId) => {
     try {
@@ -183,7 +178,9 @@ const Job = () => {
           style={{ overflowY: "auto" }}
         >
           <h1 className="text-2xl font-semibold mb-2">{job.title}</h1>
-          <h1 className="text-sm mb-10">{job.contract} - {job.position}</h1>
+          <h1 className="text-sm mb-10">
+            {job.contract} - {job.position}
+          </h1>
           <p
             className="text-lg text-gray-700"
             dangerouslySetInnerHTML={{ __html: job.description }}
@@ -191,6 +188,13 @@ const Job = () => {
         </div>
 
         <div className="w-1/4 p-4 bg-gray-50 rounded-lg shadow-md ml-4 justify-center">
+          {currentUser && currentUser._id === job.uid && (
+            <div className="edit">
+              <Link to={`/postjob?edit=2`} state={job}>
+                <Edit />
+              </Link>
+            </div>
+          )}
           <div className="flex items-center mb-2 mt-5 border rounded-md border-gray-300 p-3 bg-white">
             <Avatar
               src={

@@ -2,6 +2,7 @@ import React, { useContext } from "react";
 import heroBg from "../assets/HeroVectorF.png";
 import { AuthContext } from "../context/authContext";
 import { useNavigate } from "react-router-dom";
+import defaultAvatar from "../assets/default-avatar.jpg"
 
 const Home = () => {
   const { currentUser } = useContext(AuthContext);
@@ -41,7 +42,7 @@ const Home = () => {
                       className="h-24 w-24 ml-2 rounded-full"
                       src={
                         currentUser.profileImage ||
-                        "https://avatars.dicebear.com/api/adventurer-neutral/mail%40ashallendesign.co.uk.svg"
+                        defaultAvatar
                       }
                       alt=""
                     />
@@ -91,7 +92,7 @@ const Home = () => {
                       className="h-24 w-24 ml-2 rounded-full"
                       src={
                         currentUser.profileImage ||
-                        "https://avatars.dicebear.com/api/adventurer-neutral/mail%40ashallendesign.co.uk.svg"
+                        defaultAvatar
                       }
                       alt=""
                     />

@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { AuthContext } from "../context/authContext";
 import _axios from "../api/_axios";
-
+import defaultAvatar from "../assets/default-avatar.jpg"
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import Edit from "@mui/icons-material/Edit";
 import CloseIcon from "@mui/icons-material/Close";
@@ -309,7 +309,7 @@ const Profile = () => {
                   <img
                     src={
                       userInfo.profileImage ||
-                      "https://avatars.dicebear.com/api/adventurer-neutral/mail%40ashallendesign.co.uk.svg"
+                      defaultAvatar
                     }
                     alt="Profile Picture"
                     className="mx-auto h-24 w-24 rounded-full"
@@ -489,7 +489,7 @@ const Profile = () => {
                   <img
                     src={
                       userInfo.profileImage ||
-                      "https://avatars.dicebear.com/api/adventurer-neutral/mail%40ashallendesign.co.uk.svg"
+                      defaultAvatar
                     }
                     alt="Profile Picture"
                     className="mx-auto h-24 w-24 rounded-full"
@@ -659,11 +659,11 @@ const Profile = () => {
                             Subscribed Search Presets :
                             <div>
                               {userInfo.subscribed.map((sub, index) => (
-                                <>
+                                <><Link to={`/feed?title=${sub[0].title}&tags=${sub[0].tags}&location=${sub[0].location}&contract=${sub[0].contract}`}>
                                   <div
                                     key={index}
                                     className="transition w-fit h-fit duration-300 ease-in-out transform hover:scale-103 hover:shadow-2xl mb-5 bg-gradient-to-b  text-gray-900 from-gray-50 to-gray-300  p-6 rounded-lg shadow-xl  mt-8 border-solid border-black"
-                                  >
+                                 >
                                     <b>Preset {index + 1} </b>
                                     <div>
                                       <b>Title :</b> {sub[0].title}
@@ -678,7 +678,7 @@ const Profile = () => {
                                     <div>
                                       <b>Contract Type :</b> {sub[0].contract}
                                     </div>
-                                  </div>
+                                  </div></Link>
                                 </>
                               ))}
                             </div>
@@ -719,7 +719,7 @@ const Profile = () => {
                                       <img
                                         src={
                                           job?.user?.[0].profileImage ||
-                                          "https://avatars.dicebear.com/api/adventurer-neutral/mail%40ashallendesign.co.uk.svg"
+                                          defaultAvatar
                                         }
                                         alt="User Avatar"
                                         style={{
@@ -901,7 +901,7 @@ const Profile = () => {
                                       <img
                                         src={
                                           job?.user?.[0].profileImage ||
-                                          "https://avatars.dicebear.com/api/adventurer-neutral/mail%40ashallendesign.co.uk.svg"
+                                          defaultAvatar
                                         }
                                         alt="User Avatar"
                                         style={{
@@ -968,7 +968,7 @@ const Profile = () => {
                                                 <img
                                                   src={
                                                     user?.profileImage ||
-                                                    "https://avatars.dicebear.com/api/adventurer-neutral/mail%40ashallendesign.co.uk.svg"
+                                                    defaultAvatar
                                                   }
                                                   alt="User Avatar"
                                                   style={{
@@ -1069,9 +1069,9 @@ const Profile = () => {
           {" "}
           <div>
             {" "}
-            <button className="w-full px-4 py-2 tracking-wide bg-blue-950 text-white transition-colors duration-200 transform rounded-md hover:bg-blue-600 focus:outline-none focus:bg-blue-300 submit-btn">
-              <a href="/login">Login or Register</a>
-            </button>
+            <a href="/login"><button className="w-full px-4 py-2 tracking-wide bg-blue-950 text-white transition-colors duration-200 transform rounded-md hover:bg-blue-600 focus:outline-none focus:bg-blue-300 submit-btn">
+              Login or Register
+            </button></a>
           </div>
         </>
       )}

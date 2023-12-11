@@ -5,6 +5,7 @@ import { Disclosure, Menu, Transition } from "@headlessui/react";
 import { Bars3Icon, BellIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { useNavigate } from "react-router-dom";
 import logo from "../assets/SmartJobsSmallLogo.png";
+import defaultAvatar from "../assets/default-avatar.jpg"
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
@@ -112,7 +113,7 @@ const Navbar = () => {
                             className="h-8 w-8 rounded-full"
                             src={
                               currentUser.profileImage ||
-                              "https://avatars.dicebear.com/api/adventurer-neutral/mail%40ashallendesign.co.uk.svg"
+                              defaultAvatar
                             } alt=""
                           />
                         </Menu.Button>
@@ -182,7 +183,7 @@ const Navbar = () => {
                           <span className="sr-only">Open user menu</span>
                           <img
                             className="h-8 w-8 rounded-full"
-                            src="https://avatars.dicebear.com/api/adventurer-neutral/mail%40ashallendesign.co.uk.svg"
+                            src={defaultAvatar}
                             alt=""
                           />
                         </Menu.Button>
