@@ -6,9 +6,10 @@ import defaultAvatar from "../assets/default-avatar.jpg";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import Edit from "@mui/icons-material/Edit";
 import CloseIcon from "@mui/icons-material/Close";
+import PaidIcon from "@mui/icons-material/Paid";
+import AlarmIcon from "@mui/icons-material/Alarm";
 import DoneIcon from "@mui/icons-material/Done";
 import {
-  
   Chip,
   CircularProgress,
   FormControl,
@@ -292,13 +293,15 @@ const Profile = () => {
     }
   };
 
-
   const handleRemoveSubscribed = async (index) => {
     try {
-      const response = await _axios.delete(`/users/${userInfo._id}/subscribe-search/remove`, {
-        index,
-      });
-  
+      const response = await _axios.delete(
+        `/users/${userInfo._id}/subscribe-search/remove`,
+        {
+          index,
+        }
+      );
+
       if (response.status === 200) {
         // Update the local state if the subscription is removed successfully
         setUserInfo((prevUser) => {
@@ -314,7 +317,6 @@ const Profile = () => {
       console.error("Error while removing subscription:", error);
     }
   };
-
 
   return (
     <div className="min-h-screen bg-slate-100 py-12 px-4 sm:px-6 lg:px-8">
@@ -726,7 +728,12 @@ const Profile = () => {
                                         }}
                                       />
                                     </div>
-                                    <DeleteIcon className="cursor-pointer hover:text-red-600" onClick={() => handleRemoveSubscribed(index)}/>
+                                    <DeleteIcon
+                                      className="cursor-pointer hover:text-red-600"
+                                      onClick={() =>
+                                        handleRemoveSubscribed(index)
+                                      }
+                                    />
                                   </div>
                                 </>
                               ))}
@@ -791,6 +798,12 @@ const Profile = () => {
                                         job.description.slice(0, 85) + "...",
                                     }}
                                   ></div>
+                                  <div className="flex text-xs items-center space-x-2">
+                                    <PaidIcon className="text-green-800 mr-1" />
+                                    {job.salary === "other"
+                                      ? job.specificSalary + " $/year"
+                                      : job.salary}
+                                  </div>
                                 </Link>
                                 <div className="flex flex-wrap items-center space-x-4">
                                   <div className="flex text-xs items-center space-x-2">
@@ -800,6 +813,10 @@ const Profile = () => {
                                   <div className="flex text-xs items-center space-x-2">
                                     <AccessTimeIcon fontSize="medium" />
                                     {moment(job.postdate).fromNow()}
+                                  </div>
+                                  <div className="flex text-xs items-center space-x-2">
+                                    <AlarmIcon className="text-red-800 mr-1" />
+                                    {job?.deadline}
                                   </div>
                                   <div className="flex items-center text-xs space-x-2">
                                     {job.likes &&

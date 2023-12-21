@@ -15,6 +15,8 @@ import {
 } from "@mui/material";
 import Button from "@mui/joy/Button";
 import Card from "@mui/joy/Card";
+import AlarmIcon from "@mui/icons-material/Alarm";
+import PaidIcon from "@mui/icons-material/Paid";
 import CardContent from "@mui/joy/CardContent";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import moment from "moment";
@@ -346,6 +348,12 @@ const OtherProfile = () => {
                                       job.description.slice(0, 85) + "...",
                                   }}
                                 ></div>
+                                    <div className="flex text-xs items-center space-x-2">
+                                    <PaidIcon className="text-green-800 mr-1" />
+                                    {job.salary === "other"
+                                      ? job.specificSalary + " $/year"
+                                      : job.salary}
+                                  </div>
                               </Link>
                               <div className="flex flex-wrap items-center space-x-4">
                                 <div className="flex text-xs items-center space-x-2">
@@ -356,6 +364,10 @@ const OtherProfile = () => {
                                   <AccessTimeIcon fontSize="medium"/>
                                   {moment(job.postdate).fromNow()}
                                 </div>
+                                <div className="flex text-xs items-center space-x-2">
+                                    <AlarmIcon className="text-red-800 mr-1" />
+                                    {job?.deadline}
+                                  </div>
                                 <div className="flex items-center text-xs space-x-2">
                                 {job.likes && job.likes.includes(currentUser._id) ? (
                   <>

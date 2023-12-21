@@ -4,6 +4,7 @@ import { db } from "../db.js";
 import jwt from "jsonwebtoken";
 import cookieSession from "cookie-session";
 import { MongoClient, ObjectId } from "mongodb";
+import { getInternalRecommendedCategories } from "../controllers/recommended.js";
 
 const dbName = "cluster0";
 
@@ -74,7 +75,7 @@ const sendWelcomeEmail = (userEmail) => {
     }
   });
 };
-const sendSavedJobsEmail = (userId, userEmail, savedJobs, subscribedJobs) => {
+const sendSavedJobsEmail = (userId, username, userEmail, savedJobs, subscribedJobs, recommenndedJobs) => {
   const secretKey = "SJtoken";
 
   const generateToken = (userId) => {
@@ -146,6 +147,7 @@ const sendSavedJobsEmail = (userId, userEmail, savedJobs, subscribedJobs) => {
     </head>
     <body>
       <div class="container">
+      <h1>Hello ${username}</h1>
         <h1>SmartJobs Weekly Digest</h1>
     
         <div class="section-heading saved-jobs">Your Saved Jobs</div>
@@ -181,7 +183,16 @@ const sendSavedJobsEmail = (userId, userEmail, savedJobs, subscribedJobs) => {
         <div class="section-heading recommended-jobs">Recommended Jobs</div>
         <p>Discover personalized job recommendations just for you:</p>
         <ul class="job-list">
-      
+        ${recommenndedJobs
+          .map(
+            (job) =>
+              `<li class="job-item"><a href="http://localhost:3000/job/${
+                job._id
+              }?token=${generateToken(userId)}">${job.title} - ${
+                job.position
+              }</a></li>`
+          )
+          .join("")}
         </ul>
     
         <p>Explore these opportunities and apply when ready!</p>
@@ -267,14 +278,25 @@ const scheduleSavedJobsEmail = async () => {
         ]).toArray()
       : [];
     
-    if (savedJobs.length > 0 || subscribedJobs.length > 0) {
+      const jobCollection = dbname.collection('jobs');
+
+      const recommendedCategoriesResponse = await getInternalRecommendedCategories(user._id);
+      
+      const recommendedCategories = recommendedCategoriesResponse.recommendedCategories;
+      
+      const recommenndedJobs = await jobCollection.find({ category: { $in: recommendedCategories } }).toArray();
+      
+      
+
+
+    if (savedJobs.length > 0 || subscribedJobs.length > 0 || recommenndedJobs.length > 0) {
       console.log("Found saved Jobs for : " + mailingUsers[0].username);
       console.log(
         "Found Subscribed Jobs Jobs for : " +
           
           mailingUsers[0].username
       );
-       sendSavedJobsEmail(user._id, user.email, savedJobs, subscribedJobs);
+       sendSavedJobsEmail(user._id, user.username, user.email, savedJobs, subscribedJobs, recommenndedJobs);
     }
     }
 

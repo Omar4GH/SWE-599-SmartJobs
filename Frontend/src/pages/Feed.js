@@ -44,7 +44,8 @@ const Feed = () => {
 
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
-
+  const [recJobs, setRecJobs] = useState([]);
+  const [recCat, setRecCat] = useState(null);
   const [jobs, setJobs] = useState(null);
   const [liked, setLiked] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -86,6 +87,27 @@ const Feed = () => {
     }
   };
 
+  const fetchRecJobs = async () => {
+    try {
+      if (currentUser) {
+        const res = await _axios.get(`recommended/job/${currentUser._id}`);
+        setRecJobs(res.data);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+  const fetchRecCat = async () => {
+    try {
+      if (currentUser) {
+        const res = await _axios.get(`recommended/cat/${currentUser._id}`);
+        setRecCat(res.data);
+        console.log(res.data);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
   const [showMore, setShowMore] = useState({});
   const handleShowMore = (jobId) => {
     setShowMore((prevState) => ({
@@ -98,6 +120,8 @@ const Feed = () => {
     fetchData();
     getUser();
     getUsers();
+    fetchRecJobs();
+    fetchRecCat();
   }, [trigger, titleFilter, selectedCountry, tagFilter, contractFilter]);
 
   const updateSavedJobs = async (jobId) => {
@@ -453,6 +477,22 @@ const Feed = () => {
           </AccordionDetails>
         </Accordion>
       </div>
+      <div className="bg-gray-50 w-2/4 p-4 rounded-3xl">
+      <h1>Your Interests</h1>
+      <div className="w-3/4 flex flex-row my-4 justify-center items-center">
+        <div>
+          {recCat.recommendedCategories.map((category, index) => (
+            <Chip
+              key={index}
+              className="w-fit feed-chip mt-2 mr-2"
+              label={category}
+              size="medium"
+              color="success"
+            />
+          ))}
+        </div>
+      </div>
+    </div>
       <div className="w-3/4 flex flex-row justify-between my-4">
         <Chip
           className="w-fit feed-chip mt-2 mr-2"
@@ -482,174 +522,158 @@ const Feed = () => {
         />
       </div>
       <div className="w-3/4">
-  <div className="flex flex-row justify-between overflow-x-auto">
-    {contractTypes.map((contract, index) => (
-      <Chip
-        key={index}
-        className="w-fit feed-chip mt-2"
-        label={contract.value}
-        variant={`${contractFilter === contract.value ? "filled" : "outlined"}`}
-        size="medium"
-        color="success"
-        onClick={() => handleContractFilter(contract.value)}
-      />
-    ))}
-  </div>
-</div>
-
-
-      {jobs ? (
-        <>
-          {jobs.map((job) => (
+        <div className="flex flex-row justify-between overflow-x-auto">
+          {contractTypes.map((contract, index) => (
+            <Chip
+              key={index}
+              className="w-fit feed-chip mt-2"
+              label={contract.value}
+              variant={`${
+                contractFilter === contract.value ? "filled" : "outlined"
+              }`}
+              size="medium"
+              color="success"
+              onClick={() => handleContractFilter(contract.value)}
+            />
+          ))}
+        </div>
+      </div>
+      <div className="w-screen flex">
+        <div className="w-1/5 "></div>
+        <div className="w-3/5 h-fit">
+          {jobs ? (
             <>
-              <>
-                {" "}
-                <div
-                  className={`transition duration-300 ease-in-out transform hover:scale-105 hover:shadow-2xl mb-10 bg-gradient-to-b h-full text-gray-900 ${getGradientColors(
-                    job.category
-                  )}  p-6 rounded-lg shadow-xl w-1/2 max-w-xl mx-auto mt-8 border-solid border-black`}
-                  style={{
-                    fontFamily: "Montserrat, sans-serif",
-                    boxShadow: "0px 4px 4px rgba(0, 0, 0, 0.25)",
-                    borderRadius: "16px", // Adjust the value for the desired border radius
-                  }}
-                >
-                  {" "}
-                  <Link to={`/job/${job._id}`}>
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="w-3/5">
-                        <h1 className="text-3xl font-medium">{job?.title}</h1>
-                      </div>
-                      <div className="flex items-center space-x-2 w-2/5">
-                        <img
-                          src={job?.user?.[0].profileImage || defaultAvatar}
-                          alt="User Avatar"
-                          style={{
-                            width: "50px",
-                            height: "50px",
-                            borderRadius: "50%",
-                          }}
-                        />
-                        <p className="text-sm">
-                          {job?.user?.[0]?.company || "Unknown"}
-                          <br />
-                          <p className="text-xs">
-                            Posted by : {job?.user?.[0]?.username || "Unknown"}
-                          </p>
-                        </p>
-                      </div>
-                    </div>
-                    <div className="text-base font-medium mb-2">
-                      {job?.contract} - {job?.position}
-                    </div>
+              {jobs.map((job) => (
+                <>
+                  <>
+                    {" "}
                     <div
-                      className="mb-4 text-base text-black"
-                      dangerouslySetInnerHTML={{
-                        __html: job.description.slice(0, 90) + "...",
+                      className={`transition duration-300 ease-in-out transform hover:scale-105 hover:shadow-2xl mb-10 bg-gradient-to-b h-full text-gray-900 ${getGradientColors(
+                        job.category
+                      )}  p-6 rounded-lg shadow-xl w-1/2 max-w-xl mx-auto mt-8 border-solid border-black`}
+                      style={{
+                        fontFamily: "Montserrat, sans-serif",
+                        boxShadow: "0px 4px 4px rgba(0, 0, 0, 0.25)",
+                        borderRadius: "16px", // Adjust the value for the desired border radius
                       }}
-                    ></div>
-                    <div className="flex text-sm items-center space-x-2">
-                      <PaidIcon className="text-green-800 mr-1" />
-                      {job.salary === "other"
-                        ? job.specificSalary + " $/year"
-                        : job.salary}
-                    </div>
-                  </Link>
-                  <div className="flex flex-wrap items-center space-x-4">
-                    <div className="flex text-sm items-center space-x-2">
-                      <LocationOnIcon />
-                      {job?.location}
-                    </div>
-                    <div
-                      className="flex text-sm items-center space-x-2 "
-                      style={{ textShadow: "0 0 5px white" }}
                     >
-                      <AccessTimeIcon className="mr-1" />
-                      {moment(job.postdate).fromNow()}
-                    </div>
-                    <div className="flex items-center text-sm space-x-2">
-                      {currentUser ? (
-                        job.likes && job.likes.includes(currentUser?._id) ? (
+                      {" "}
+                      <Link to={`/job/${job._id}`}>
+                        <div className="flex items-center justify-between mb-4">
+                          <div className="w-3/5">
+                            <h1 className="text-3xl font-medium">
+                              {job?.title}
+                            </h1>
+                          </div>
+                          <div className="flex items-center space-x-2 w-2/5">
+                            <img
+                              src={job?.user?.[0].profileImage || defaultAvatar}
+                              alt="User Avatar"
+                              style={{
+                                width: "50px",
+                                height: "50px",
+                                borderRadius: "50%",
+                              }}
+                            />
+                            <p className="text-sm">
+                              {job?.user?.[0]?.company || "Unknown"}
+                              <br />
+                              <p className="text-xs">
+                                Posted by :{" "}
+                                {job?.user?.[0]?.username || "Unknown"}
+                              </p>
+                            </p>
+                          </div>
+                        </div>
+                        <div className="text-base font-medium mb-2">
+                          {job?.contract} - {job?.position}
+                        </div>
+                        <div
+                          className="mb-4 text-base text-black"
+                          dangerouslySetInnerHTML={{
+                            __html: job.description.slice(0, 90) + "...",
+                          }}
+                        ></div>
+                        <div className="flex text-sm items-center space-x-2">
+                          <PaidIcon className="text-green-800 mr-1" />
+                          {job.salary === "other"
+                            ? job.specificSalary + " $/year"
+                            : job.salary}
+                        </div>
+                      </Link>
+                      <div className="flex flex-wrap items-center space-x-4">
+                        <div className="flex text-sm items-center space-x-2">
+                          <LocationOnIcon />
+                          {job?.location}
+                        </div>
+                        <div
+                          className="flex text-sm items-center space-x-2 "
+                          style={{ textShadow: "0 0 5px white" }}
+                        >
+                          <AccessTimeIcon className="mr-1" />
+                          {moment(job.postdate).fromNow()}
+                        </div>
+                        <div className="flex items-center text-sm space-x-2">
+                          {currentUser ? (
+                            job.likes &&
+                            job.likes.includes(currentUser?._id) ? (
+                              <>
+                                {" "}
+                                <ThumbUpIcon
+                                  fontSize="large"
+                                  onClick={() => removeLike(job._id)}
+                                  className=" cursor-pointer hover:text-red-800 text-blue-800 mr-1"
+                                />
+                              </>
+                            ) : (
+                              <>
+                                <ThumbUpOffAlt
+                                  fontSize="large"
+                                  onClick={() => likeJob(job._id)}
+                                  className=" cursor-pointer hover:text-blue-800 text-blue-500"
+                                />
+                              </>
+                            )
+                          ) : (
+                            <>
+                              <ThumbUpOffAlt
+                                fontSize="large"
+                                className=" cursor-pointer hover:text-gray-700"
+                              />
+                            </>
+                          )}
+
+                          {job?.likes.length}
+                        </div>{" "}
+                        {savedPosts && savedPosts.includes(job._id) ? (
                           <>
                             {" "}
-                            <ThumbUpIcon
+                            <BookmarkRemoveIcon
                               fontSize="large"
-                              onClick={() => removeLike(job._id)}
-                              className=" cursor-pointer hover:text-red-800 text-blue-800 mr-1"
+                              onClick={() => removeSavedJob(job._id)}
+                              className=" cursor-pointer hover:text-red-800"
                             />
                           </>
                         ) : (
                           <>
-                            <ThumbUpOffAlt
+                            <BookmarkBorderIcon
                               fontSize="large"
-                              onClick={() => likeJob(job._id)}
-                              className=" cursor-pointer hover:text-blue-800 text-blue-500"
+                              onClick={() => updateSavedJobs(job._id)}
+                              className=" cursor-pointer hover:text-blue-800"
                             />
                           </>
-                        )
-                      ) : (
-                        <>
-                          <ThumbUpOffAlt
-                            fontSize="large"
-                            className=" cursor-pointer hover:text-gray-700"
-                          />
-                        </>
-                      )}
-
-                      {job?.likes.length}
-                    </div>{" "}
-                    {savedPosts && savedPosts.includes(job._id) ? (
-                      <>
-                        {" "}
-                        <BookmarkRemoveIcon
-                          fontSize="large"
-                          onClick={() => removeSavedJob(job._id)}
-                          className=" cursor-pointer hover:text-red-800"
-                        />
-                      </>
-                    ) : (
-                      <>
-                        <BookmarkBorderIcon
-                          fontSize="large"
-                          onClick={() => updateSavedJobs(job._id)}
-                          className=" cursor-pointer hover:text-blue-800"
-                        />
-                      </>
-                    )}
-                    <div className="flex text-sm items-center space-x-2">
-                      <AlarmIcon className="text-red-800 mr-1" />
-                      {job?.deadline}
-                    </div>
-                  </div>
-                  <div className="mt-3">
-                    <div className="text-lg font-semibold">Tags</div>
-                    <div className="flex space-x-2">
-                      {job.tags && job.tags.length > 0 ? (
-                        <div>
-                          {job.tags.slice(0, 5).map((tag, index) => (
-                            <Chip
-                              className="w-fit feed-chip mt-2 mr-2"
-                              key={tag}
-                              label={tag}
-                              size="medium"
-                              color="primary"
-                            />
-                          ))}
-                          {job.tags.length > 5 &&
-                            job.tags.slice(5).length > 0 && (
-                              <button
-                                className="text-blue-500 text-sm float-right font-semibold mt-2 focus:outline-none"
-                                onClick={() => handleShowMore(job._id)}
-                              >
-                                {showMore[job.id]
-                                  ? "Show Less"
-                                  : `+${job.tags.slice(5).length} more`}
-                              </button>
-                            )}
-                          {showMore[job._id] &&
-                            job.tags
-                              .slice(5)
-                              .map((tag, index) => (
+                        )}
+                        <div className="flex text-sm items-center space-x-2">
+                          <AlarmIcon className="text-red-800 mr-1" />
+                          {job?.deadline}
+                        </div>
+                      </div>
+                      <div className="mt-3">
+                        <div className="text-lg font-semibold">Tags</div>
+                        <div className="flex space-x-2">
+                          {job.tags && job.tags.length > 0 ? (
+                            <div>
+                              {job.tags.slice(0, 5).map((tag, index) => (
                                 <Chip
                                   className="w-fit feed-chip mt-2 mr-2"
                                   key={tag}
@@ -658,87 +682,153 @@ const Feed = () => {
                                   color="primary"
                                 />
                               ))}
+                              {job.tags.length > 5 &&
+                                job.tags.slice(5).length > 0 && (
+                                  <button
+                                    className="text-blue-500 text-sm float-right font-semibold mt-2 focus:outline-none"
+                                    onClick={() => handleShowMore(job._id)}
+                                  >
+                                    {showMore[job.id]
+                                      ? "Show Less"
+                                      : `+${job.tags.slice(5).length} more`}
+                                  </button>
+                                )}
+                              {showMore[job._id] &&
+                                job.tags
+                                  .slice(5)
+                                  .map((tag, index) => (
+                                    <Chip
+                                      className="w-fit feed-chip mt-2 mr-2"
+                                      key={tag}
+                                      label={tag}
+                                      size="medium"
+                                      color="primary"
+                                    />
+                                  ))}
+                            </div>
+                          ) : (
+                            <></>
+                          )}
                         </div>
-                      ) : (
-                        <></>
-                      )}
+                      </div>
+                      <FormControl className="w-fit border   cursor-pointer">
+                        <InputLabel
+                          variant="standard"
+                          htmlFor="uncontrolled-native"
+                        >
+                          Mark
+                        </InputLabel>
+                        <NativeSelect
+                          defaultValue={30}
+                          inputProps={{
+                            name: "mark",
+                            id: "uncontrolled-native",
+                          }}
+                          className="rounded-lg shadow-md "
+                        >
+                          <option value=""></option>
+                          <option value="Applied">Applied</option>
+                          <option value="Want to Apply">Want to Apply</option>
+                        </NativeSelect>
+                      </FormControl>
+                    </div>
+                  </>
+                </>
+              ))}
+            </>
+          ) : (
+            <>
+              <CircularProgress />
+              <Card
+                variant="outlined"
+                sx={{
+                  width: "max(400px, 60%)",
+                  borderRadius: 0,
+                  "--Card-radius": 0,
+                }}
+                className="w-full max-w-xl mb-4"
+              >
+                <CardContent orientation="horizontal">
+                  <Skeleton variant="rectangular" width={44} height={44} />
+                  <div>
+                    <Skeleton variant="text" width={100} />
+                    <Skeleton level="body-sm" variant="text" width={200} />
+                  </div>
+                </CardContent>
+                <CardContent sx={{ gap: 0.5, mt: 1 }}>
+                  <Skeleton level="body-xs" variant="text" width="92%" />
+                  <Skeleton level="body-xs" variant="text" width="99%" />
+                  <Skeleton level="body-xs" variant="text" width="96%" />
+                </CardContent>
+              </Card>
+
+              <Card
+                variant="outlined"
+                sx={{
+                  width: "max(400px, 60%)",
+                  borderRadius: 0,
+                  "--Card-radius": 0,
+                }}
+                className="w-full max-w-xl mb-4"
+              >
+                <CardContent orientation="horizontal">
+                  <Skeleton variant="rectangular" width={44} height={44} />
+                  <div>
+                    <Skeleton variant="text" width={100} />
+                    <Skeleton level="body-sm" variant="text" width={200} />
+                  </div>
+                </CardContent>
+                <CardContent sx={{ gap: 0.5, mt: 1 }}>
+                  <Skeleton level="body-xs" variant="text" width="92%" />
+                  <Skeleton level="body-xs" variant="text" width="99%" />
+                  <Skeleton level="body-xs" variant="text" width="96%" />
+                </CardContent>
+              </Card>
+            </>
+          )}
+        </div>{" "}
+        <div className="w-1/5 flex flex-col items-center">
+          <h1 className="mb-4 text-base font-extrabold mt-10 tracking-tight text-gray-900 md:text-xl lg:text-2xl dark:text-black">
+            <span className="underline underline-offset-3 decoration-8 decoration-blue-400 dark:decoration-blue-600">
+              Recommended Jobs
+            </span>
+          </h1>
+          <div className="h-fit">
+            {recJobs &&
+              recJobs.map((job) => (
+                <Link to={`/job/${job._id}`}>
+                  <div
+                    className={`transition duration-300 ease-in-out transform hover:scale-105 hover:shadow-2xl mb-10 bg-gradient-to-b h-fit text-gray-900 ${getGradientColors(
+                      job.category
+                    )}  p-6 rounded-lg shadow-xl w-full max-w-xl mx-1 mt-8 border-solid border-black`}
+                    style={{
+                      fontFamily: "Montserrat, sans-serif",
+                      boxShadow: "0px 4px 4px rgba(0, 0, 0, 0.25)",
+                      borderRadius: "16px", // Adjust the value for the desired border radius
+                    }}
+                  >
+                    <div className="">
+                      <h1 className="text-sm font-medium">{job?.title}</h1>
+                    </div>
+                    <div className="text-xs my-2 font-medium mb-2">
+                      {job?.contract} - {job?.position}
+                    </div>
+                    <div className="flex text-xs items-center space-x-2">
+                      <PaidIcon className="text-green-800 mr-1" />
+                      {job.salary === "other"
+                        ? job.specificSalary + " $/year"
+                        : job.salary}
+                    </div>
+                    <div className="flex text-xs items-center space-x-2">
+                      <LocationOnIcon />
+                      {job?.location}
                     </div>
                   </div>
-                  <FormControl className="w-fit border   cursor-pointer">
-                    <InputLabel
-                      variant="standard"
-                      htmlFor="uncontrolled-native"
-                    >
-                      Mark
-                    </InputLabel>
-                    <NativeSelect
-                      defaultValue={30}
-                      inputProps={{
-                        name: "mark",
-                        id: "uncontrolled-native",
-                      }}
-                      className="rounded-lg shadow-md "
-                    >
-                      <option value=""></option>
-                      <option value="Applied">Applied</option>
-                      <option value="Want to Apply">Want to Apply</option>
-                    </NativeSelect>
-                  </FormControl>
-                </div>
-              </>
-            </>
-          ))}
-        </>
-      ) : (
-        <>
-          <CircularProgress />
-          <Card
-            variant="outlined"
-            sx={{
-              width: "max(400px, 60%)",
-              borderRadius: 0,
-              "--Card-radius": 0,
-            }}
-            className="w-full max-w-xl mb-4"
-          >
-            <CardContent orientation="horizontal">
-              <Skeleton variant="rectangular" width={44} height={44} />
-              <div>
-                <Skeleton variant="text" width={100} />
-                <Skeleton level="body-sm" variant="text" width={200} />
-              </div>
-            </CardContent>
-            <CardContent sx={{ gap: 0.5, mt: 1 }}>
-              <Skeleton level="body-xs" variant="text" width="92%" />
-              <Skeleton level="body-xs" variant="text" width="99%" />
-              <Skeleton level="body-xs" variant="text" width="96%" />
-            </CardContent>
-          </Card>
-
-          <Card
-            variant="outlined"
-            sx={{
-              width: "max(400px, 60%)",
-              borderRadius: 0,
-              "--Card-radius": 0,
-            }}
-            className="w-full max-w-xl mb-4"
-          >
-            <CardContent orientation="horizontal">
-              <Skeleton variant="rectangular" width={44} height={44} />
-              <div>
-                <Skeleton variant="text" width={100} />
-                <Skeleton level="body-sm" variant="text" width={200} />
-              </div>
-            </CardContent>
-            <CardContent sx={{ gap: 0.5, mt: 1 }}>
-              <Skeleton level="body-xs" variant="text" width="92%" />
-              <Skeleton level="body-xs" variant="text" width="99%" />
-              <Skeleton level="body-xs" variant="text" width="96%" />
-            </CardContent>
-          </Card>
-        </>
-      )}
+                </Link>
+              ))}
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
