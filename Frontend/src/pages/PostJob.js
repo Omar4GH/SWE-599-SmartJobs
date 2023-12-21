@@ -90,7 +90,6 @@ const PostJob = () => {
       setError(err.response.data);
     }
   };
-
   const colors = ["red", "green", "blue", "orange", "violet", "white", "black"];
 
   const toolbarOptions = [

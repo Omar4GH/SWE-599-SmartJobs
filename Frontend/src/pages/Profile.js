@@ -2,13 +2,13 @@ import React, { useContext, useEffect, useState } from "react";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { AuthContext } from "../context/authContext";
 import _axios from "../api/_axios";
-import defaultAvatar from "../assets/default-avatar.jpg"
+import defaultAvatar from "../assets/default-avatar.jpg";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import Edit from "@mui/icons-material/Edit";
 import CloseIcon from "@mui/icons-material/Close";
 import DoneIcon from "@mui/icons-material/Done";
 import {
-  Avatar,
+  
   Chip,
   CircularProgress,
   FormControl,
@@ -17,22 +17,15 @@ import {
 } from "@mui/material";
 import Button from "@mui/joy/Button";
 import Card from "@mui/joy/Card";
-import CardContent from "@mui/joy/CardContent";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import moment from "moment";
 import ThumbUpOffAlt from "@mui/icons-material/ThumbUpOffAlt";
 import ThumbUpIcon from "@mui/icons-material/ThumbUp";
-import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
-import BookmarkIcon from "@mui/icons-material/Bookmark";
 import BookmarkRemoveIcon from "@mui/icons-material/BookmarkRemove";
 import { Link } from "react-router-dom";
 import SettingsIcon from "@mui/icons-material/Settings";
+import NotificationsIcon from "@mui/icons-material/Notifications";
 import PersonIcon from "@mui/icons-material/Person";
-import Dropdown from "@mui/joy/Dropdown";
-import Menu from "@mui/joy/Menu";
-import MenuButton from "@mui/joy/MenuButton";
-import MenuItem from "@mui/joy/MenuItem";
-import MoreVert from "@mui/icons-material/MoreVert";
 import Switch from "@mui/material/Switch";
 
 const Profile = () => {
@@ -274,13 +267,54 @@ const Profile = () => {
   /////////////////////////////////
   const [open, setOpen] = useState(false);
 
-  const handleClickOpen = () => {
-    setOpen(true);
+  const handleChangeAlert = async (index) => {
+    try {
+      const response = await _axios.put(
+        `/users/${userInfo._id}/subscribe-search/updatealert`,
+        {
+          index,
+          alert: !userInfo.subscribed[index][0].alert, // Toggle the alert status
+        }
+      );
+
+      if (response.status === 200) {
+        // Update the local state if the alert is updated successfully
+        setUserInfo((prevUser) => {
+          const newSubscribed = [...prevUser.subscribed];
+          newSubscribed[index][0].alert = !newSubscribed[index][0].alert;
+          return { ...prevUser, subscribed: newSubscribed };
+        });
+      } else {
+        console.error("Failed to update alert");
+      }
+    } catch (error) {
+      console.error("Error while updating alert:", error);
+    }
   };
 
-  const handleClose = () => {
-    setOpen(false);
+
+  const handleRemoveSubscribed = async (index) => {
+    try {
+      const response = await _axios.delete(`/users/${userInfo._id}/subscribe-search/remove`, {
+        index,
+      });
+  
+      if (response.status === 200) {
+        // Update the local state if the subscription is removed successfully
+        setUserInfo((prevUser) => {
+          const newSubscribed = [...prevUser.subscribed];
+          newSubscribed.splice(index, 1);
+          return { ...prevUser, subscribed: newSubscribed };
+        });
+        setTrigger(!trigger);
+      } else {
+        console.error("Failed to remove subscription");
+      }
+    } catch (error) {
+      console.error("Error while removing subscription:", error);
+    }
   };
+
 
   return (
     <div className="min-h-screen bg-slate-100 py-12 px-4 sm:px-6 lg:px-8">
@@ -307,10 +341,7 @@ const Profile = () => {
                 />
                 <div className="text-center justify-center">
                   <img
-                    src={
-                      userInfo.profileImage ||
-                      defaultAvatar
-                    }
+                    src={userInfo.profileImage || defaultAvatar}
                     alt="Profile Picture"
                     className="mx-auto h-24 w-24 rounded-full"
                   />
@@ -487,10 +518,7 @@ const Profile = () => {
                 />
                 <div className="text-center">
                   <img
-                    src={
-                      userInfo.profileImage ||
-                      defaultAvatar
-                    }
+                    src={userInfo.profileImage || defaultAvatar}
                     alt="Profile Picture"
                     className="mx-auto h-24 w-24 rounded-full"
                   />
@@ -517,7 +545,9 @@ const Profile = () => {
                     onClick={() => {
                       setTab(1);
                     }}
-                    className={`mx-3 cursor-pointer ${tab === 1 ? 'bg-gray-200 rounded-xl' : ''}`}
+                    className={`mx-3 cursor-pointer ${
+                      tab === 1 ? "bg-gray-200 rounded-xl" : ""
+                    }`}
                   >
                     <PersonIcon fontSize="large" />
                   </div>
@@ -525,7 +555,9 @@ const Profile = () => {
                     onClick={() => {
                       setTab(2);
                     }}
-                    className={`mx-3 cursor-pointer ${tab === 2 ? 'bg-gray-200 rounded-xl' : ''}`}
+                    className={`mx-3 cursor-pointer ${
+                      tab === 2 ? "bg-gray-200 rounded-xl" : ""
+                    }`}
                   >
                     <SettingsIcon fontSize="large" />
                   </div>
@@ -657,28 +689,45 @@ const Profile = () => {
                         <>
                           <div className="my-2">
                             Subscribed Search Presets :
-                            <div>
+                            <div className="flex m-5 flex-wrap">
                               {userInfo.subscribed.map((sub, index) => (
-                                <><Link to={`/feed?title=${sub[0].title}&tags=${sub[0].tags}&location=${sub[0].location}&contract=${sub[0].contract}`}>
+                                <>
                                   <div
                                     key={index}
-                                    className="transition w-fit h-fit duration-300 ease-in-out transform hover:scale-103 hover:shadow-2xl mb-5 bg-gradient-to-b  text-gray-900 from-gray-50 to-gray-300  p-6 rounded-lg shadow-xl  mt-8 border-solid border-black"
-                                 >
-                                    <b>Preset {index + 1} </b>
+                                    className="transition w-fit h-fit duration-300 ease-in-out transform hover:scale-103 hover:shadow-2xl mb-5 mx-8 bg-gradient-to-b  text-gray-900 from-gray-50 to-gray-300  p-6 rounded-lg shadow-xl  mt-8 border-solid border-black"
+                                  >
+                                    <Link
+                                      to={`/feed?title=${sub[0].title}&tags=${sub[0].tags}&location=${sub[0].location}&contract=${sub[0].contract}`}
+                                    >
+                                      <b>Preset {index + 1} </b>
+                                      <div>
+                                        <b>Title :</b> {sub[0].title}
+                                      </div>
+                                      <div>
+                                        <b>Tags : </b>
+                                        {sub[0].tags}
+                                      </div>
+                                      <div>
+                                        <b>Location :</b> {sub[0].location}
+                                      </div>
+                                      <div>
+                                        <b>Contract Type :</b> {sub[0].contract}
+                                      </div>
+                                    </Link>
                                     <div>
-                                      <b>Title :</b> {sub[0].title}
+                                      <NotificationsIcon />{" "}
+                                      <Switch
+                                        checked={sub[0].alert}
+                                        onChange={() =>
+                                          handleChangeAlert(index)
+                                        }
+                                        inputProps={{
+                                          "aria-label": "controlled",
+                                        }}
+                                      />
                                     </div>
-                                    <div>
-                                      <b>Tags : </b>
-                                      {sub[0].tags}
-                                    </div>
-                                    <div>
-                                      <b>Location :</b> {sub[0].location}
-                                    </div>
-                                    <div>
-                                      <b>Contract Type :</b> {sub[0].contract}
-                                    </div>
-                                  </div></Link>
+                                    <DeleteIcon className="cursor-pointer hover:text-red-600" onClick={() => handleRemoveSubscribed(index)}/>
+                                  </div>
                                 </>
                               ))}
                             </div>
@@ -1069,9 +1118,11 @@ const Profile = () => {
           {" "}
           <div>
             {" "}
-            <a href="/login"><button className="w-full px-4 py-2 tracking-wide bg-blue-950 text-white transition-colors duration-200 transform rounded-md hover:bg-blue-600 focus:outline-none focus:bg-blue-300 submit-btn">
-              Login or Register
-            </button></a>
+            <a href="/login">
+              <button className="w-full px-4 py-2 tracking-wide bg-blue-950 text-white transition-colors duration-200 transform rounded-md hover:bg-blue-600 focus:outline-none focus:bg-blue-300 submit-btn">
+                Login or Register
+              </button>
+            </a>
           </div>
         </>
       )}

@@ -36,9 +36,8 @@ import Accordion from "@mui/material/Accordion";
 import DatePicker from "react-datepicker";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
-import defaultAvatar from "../assets/default-avatar.jpg"
+import defaultAvatar from "../assets/default-avatar.jpg";
 import { useLocation } from "react-router-dom";
-
 
 const Feed = () => {
   const { currentUser } = useContext(AuthContext);
@@ -191,30 +190,11 @@ const Feed = () => {
 
   ///////////////// SEARCH ///////////////////////////
 
-  const [yearFilter, setYearFilter] = useState("");
   const [countries, setCountries] = useState([]);
-  const [selectedUser, setSelectedUser] = useState(null);
-  const [userFilter, setUserFilter] = useState("");
-  const [usernameFilter, setUsernameFilter] = useState("");
   const handleCountryChange = (event, value) => {
     setSelectedCountry(value || ""); // Set the selected country value or an empty string if no country is selected
   };
-  const handleYearChange = (date) => {};
-  const handleClearYear = () => {
-    setYearFilter("");
-  };
 
-  const handleUserChange = (e, value) => {
-    if (value) {
-      setSelectedUser(value);
-      setUserFilter(value.id);
-      setUsernameFilter(value.username);
-    } else {
-      setSelectedUser(null);
-      setUserFilter("");
-      setUsernameFilter("");
-    }
-  };
   const handleTagChange = (e) => {
     setTagFilter(e.target.value);
   };
@@ -254,6 +234,7 @@ const Feed = () => {
               tags: tagFilter,
               location: selectedCountry,
               contract: contractFilter,
+              alert: true,
             },
           ],
         }
@@ -270,6 +251,24 @@ const Feed = () => {
   };
 
   //////////////////// SEARCH END  /////////////////////
+  const contractTypes = [
+    { value: "Full Time" },
+    { value: "Part Time" },
+    { value: "Permanent Contract" },
+    { value: "Fixed-term" },
+    { value: "Zero hour contract" },
+    { value: "Casual contract" },
+    { value: "Permanent contract" },
+    { value: "Freelance contract" },
+    { value: "Implied contracts" },
+    { value: "Agency contracts" },
+    { value: "Agency staff" },
+    { value: "Oral contracts" },
+    { value: "Consulting agreement" },
+    { value: "Employing family" },
+    { value: "Permanent" },
+    { value: "Severance agreements" },
+  ];
 
   const getGradientColors = (category) => {
     const categoryColors = {
@@ -335,6 +334,11 @@ const Feed = () => {
       ...prevToggles,
       [filter]: !prevToggles[filter],
     }));
+  };
+
+  const handleContractFilter = (value) => {
+    setContractFilter(value);
+    // You can perform additional actions based on the selected contract value
   };
 
   return (
@@ -449,7 +453,7 @@ const Feed = () => {
           </AccordionDetails>
         </Accordion>
       </div>
-      <div className="w-2/4 flex flex-row justify-between">
+      <div className="w-3/4 flex flex-row justify-between my-4">
         <Chip
           className="w-fit feed-chip mt-2 mr-2"
           label="Full Time"
@@ -477,6 +481,22 @@ const Feed = () => {
           onClick={() => chipSearch("tags", "Junior")}
         />
       </div>
+      <div className="w-3/4">
+  <div className="flex flex-row justify-between overflow-x-auto">
+    {contractTypes.map((contract, index) => (
+      <Chip
+        key={index}
+        className="w-fit feed-chip mt-2"
+        label={contract.value}
+        variant={`${contractFilter === contract.value ? "filled" : "outlined"}`}
+        size="medium"
+        color="success"
+        onClick={() => handleContractFilter(contract.value)}
+      />
+    ))}
+  </div>
+</div>
+
 
       {jobs ? (
         <>
@@ -502,10 +522,7 @@ const Feed = () => {
                       </div>
                       <div className="flex items-center space-x-2 w-2/5">
                         <img
-                          src={
-                            job?.user?.[0].profileImage ||
-                            defaultAvatar
-                          }
+                          src={job?.user?.[0].profileImage || defaultAvatar}
                           alt="User Avatar"
                           style={{
                             width: "50px",
