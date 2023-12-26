@@ -35,6 +35,8 @@ export const getUsers = async (req, res) => {
             country: 1,
             subscribed: 1,
             saved_posts: 1,
+            applied: 1,
+            wantToApply: 1,
             profileImage: 1,
           },
         }
@@ -163,6 +165,8 @@ export const getUser = async (req, res) => {
         country: 1,
         subscribed: 1,
         saved_posts: 1,
+        applied: 1,
+        wantToApply: 1,
         profileImage: 1,
       },
     });
@@ -315,7 +319,10 @@ export const updateAlert = async (req, res) => {
     const result = await dbname
       .collection("users")
       .updateOne(
-        { _id: new ObjectId(userId), [`subscribed.${index}.0`]: { $exists: true } },
+        {
+          _id: new ObjectId(userId),
+          [`subscribed.${index}.0`]: { $exists: true },
+        },
         { $set: { [`subscribed.${index}.0.alert`]: alert } }
       );
 
@@ -331,5 +338,129 @@ export const updateAlert = async (req, res) => {
   } catch (err) {
     console.error("Error while updating alert:", err);
     res.status(500).json("Error while updating alert");
+  }
+};
+
+
+//////////////////// APPLIED MARK 
+export const updateUserAppliedJob = async (req, res) => {
+  const userId = req.params.id; // The user's ID
+  const jobToSave = req.body.jobId; // The job ID to add to saved_jobs
+
+  try {
+    const client = new MongoClient(db, { useUnifiedTopology: true });
+    await client.connect();
+
+    const dbname = client.db(dbName);
+
+    // Update the user's saved_jobs array by pushing the job ID
+    const result = await dbname
+      .collection("users")
+      .updateOne(
+        { _id: new ObjectId(userId) },
+        { $push: { applied: jobToSave } }
+      );
+
+    if (result.modifiedCount === 1) {
+      res.status(200).json("Job marked applied successfully");
+    } else {
+      res.status(404).json("User not found"); // User with the given ID not found
+    }
+
+    client.close();
+  } catch (err) {
+    console.error("Error while updating user applied :", err);
+    res.status(500).json("Error while updating user applied");
+  }
+};
+export const removeUserAppliedJob = async (req, res) => {
+  const userId = req.params.id; // The user's ID
+  const jobToRemove = req.body.jobId; // The job ID to remove from saved_jobs
+
+  try {
+    const client = new MongoClient(db, { useUnifiedTopology: true });
+    await client.connect();
+
+    const dbname = client.db(dbName);
+
+    // Update the user's saved_jobs array by pulling the job ID
+    const result = await dbname
+      .collection("users")
+      .updateOne(
+        { _id: new ObjectId(userId) },
+        { $pull: { applied: jobToRemove } }
+      );
+
+    if (result.modifiedCount === 1) {
+      res.status(200).json("Job removed from Applied successfully");
+    } else {
+      res.status(404).json("User not found"); // User with the given ID not found
+    }
+
+    client.close();
+  } catch (err) {
+    console.error("Error while removing job from user Applied:", err);
+    res.status(500).json("Error while removing job from user Applied");
+  }
+};
+////////////////////// Want To Apply Mark
+export const updateUserWantToApplyJob = async (req, res) => {
+  const userId = req.params.id; // The user's ID
+  const jobToSave = req.body.jobId; // The job ID to add to saved_jobs
+
+  try {
+    const client = new MongoClient(db, { useUnifiedTopology: true });
+    await client.connect();
+
+    const dbname = client.db(dbName);
+
+    // Update the user's saved_jobs array by pushing the job ID
+    const result = await dbname
+      .collection("users")
+      .updateOne(
+        { _id: new ObjectId(userId) },
+        { $push: { wantToApply: jobToSave } }
+      );
+
+    if (result.modifiedCount === 1) {
+      res.status(200).json("Job saved successfully");
+    } else {
+      res.status(404).json("User not found"); // User with the given ID not found
+    }
+
+    client.close();
+  } catch (err) {
+    console.error("Error while updating user saved_jobs:", err);
+    res.status(500).json("Error while updating user saved_jobs");
+  }
+};
+export const removeUserWantToApplyJob = async (req, res) => {
+  const userId = req.params.id; // The user's ID
+  const jobToRemove = req.body.jobId; // The job ID to remove from saved_jobs
+
+  try {
+    const client = new MongoClient(db, { useUnifiedTopology: true });
+    await client.connect();
+
+    const dbname = client.db(dbName);
+
+    // Update the user's saved_jobs array by pulling the job ID
+    const result = await dbname
+      .collection("users")
+      .updateOne(
+        { _id: new ObjectId(userId) },
+        { $pull: { wantToApply: jobToRemove } }
+      );
+
+    if (result.modifiedCount === 1) {
+      res.status(200).json("Job removed from wantToApply successfully");
+    } else {
+      res.status(404).json("User not found"); // User with the given ID not found
+    }
+
+    client.close();
+  } catch (err) {
+    console.error("Error while removing job from user wantToApply:", err);
+    res.status(500).json("Error while removing job from user wantToApply");
   }
 };

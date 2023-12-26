@@ -21,6 +21,9 @@ function Register() {
     profileImage:"",
     mailing:false,
     subscribed: [],
+    saved_posts: [],
+    applied: [],
+    wantToApply: [],
     experience: [],
     education: [],
   });

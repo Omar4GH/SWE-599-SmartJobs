@@ -55,6 +55,7 @@ const Feed = () => {
   const [selectedCountry, setSelectedCountry] = useState("");
   const [tagFilter, setTagFilter] = useState("");
   const [contractFilter, setContractFilter] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("");
 
   useEffect(() => {
     // Extract parameters from URL and update state variables
@@ -78,7 +79,7 @@ const Feed = () => {
           selectedCountry
         )}&tags=${encodeURIComponent(tagFilter)}&contract=${encodeURIComponent(
           contractFilter
-        )}`
+        )}&category=${encodeURIComponent(categoryFilter)}`
       );
       setJobs(res.data);
       console.log(res.data);
@@ -122,7 +123,17 @@ const Feed = () => {
     getUsers();
     fetchRecJobs();
     fetchRecCat();
-  }, [trigger, titleFilter, selectedCountry, tagFilter, contractFilter]);
+  }, [
+    trigger,
+    titleFilter,
+    selectedCountry,
+    tagFilter,
+    contractFilter,
+    categoryFilter,
+  ]);
+  const [savedPosts, setSavedPosts] = useState([]);
+  const [appliedJobs, setAppliedJobs] = useState([]);
+  const [wantToApply, setWantToApply] = useState([]);
 
   const updateSavedJobs = async (jobId) => {
     try {
@@ -157,13 +168,97 @@ const Feed = () => {
       console.error("Error:", error);
     }
   };
+  ////////////////////////////////////////////////////////////////
+  /////////////////////////////////////////////////
 
-  const [savedPosts, setSavedPosts] = useState([]);
+  const handleMarkChange = (event, jobId) => {
+    const selectedValue = event.target.value;
+
+    if (selectedValue === "Applied") {
+      updateAppliedJobs(jobId);
+    } else if (selectedValue === "Want to Apply") {
+      updateWantToApplyJobs(jobId);
+    }
+  };
+
+  /////////////////////////////////////////////////
+  const updateAppliedJobs = async (jobId) => {
+    try {
+      const response = await _axios.post(`/users/${currentUser._id}/applied`, {
+        jobId,
+      });
+      if (response.status === 200) {
+        console.log("Job Marked Applied successfully");
+        removeWantToApplyJobs(jobId);
+        setTrigger(!trigger);
+      } else {
+        console.log("User not found or error occurred.");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+
+  const removeAppliedJobs = async (jobId) => {
+    try {
+      const response = await _axios.post(
+        `/users/${currentUser._id}/applied/remove`,
+        { jobId }
+      );
+      if (response.status === 200) {
+        setTrigger(!trigger);
+        console.log("Job unSaved successfully");
+      } else {
+        console.log("User not found or error occurred.");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+  ///////////////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////////////
+  const updateWantToApplyJobs = async (jobId) => {
+    try {
+      const response = await _axios.post(
+        `/users/${currentUser._id}/wanttoapply`,
+        { jobId }
+      );
+      if (response.status === 200) {
+        removeAppliedJobs(jobId);
+        console.log("Job Marked Applied successfully");
+        setTrigger(!trigger);
+      } else {
+        console.log("User not found or error occurred.");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+
+  const removeWantToApplyJobs = async (jobId) => {
+    try {
+      const response = await _axios.post(
+        `/users/${currentUser._id}/wanttoapply/remove`,
+        { jobId }
+      );
+      if (response.status === 200) {
+        setTrigger(!trigger);
+        console.log("Job unSaved successfully");
+      } else {
+        console.log("User not found or error occurred.");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+  ///////////////////////////////////////////////////////////////
   const getUser = async () => {
     try {
       const res = await _axios.get(`users/${currentUser._id}`);
 
       setSavedPosts(res.data.saved_posts);
+      setAppliedJobs(res.data.applied);
+      setWantToApply(res.data.wantToApply);
       console.log(res.data);
     } catch (err) {
       console.log(err);
@@ -249,25 +344,30 @@ const Feed = () => {
 
   const saveSubscribedPreset = async () => {
     try {
-      const response = await _axios.post(
-        `/users/${currentUser._id}/subscribe-search`,
-        {
-          subscribed: [
-            {
-              title: titleFilter,
-              tags: tagFilter,
-              location: selectedCountry,
-              contract: contractFilter,
-              alert: true,
-            },
-          ],
+      // Check if at least one field is filled
+      if (titleFilter || tagFilter || selectedCountry || contractFilter) {
+        const response = await _axios.post(
+          `/users/${currentUser._id}/subscribe-search`,
+          {
+            subscribed: [
+              {
+                title: titleFilter,
+                tags: tagFilter,
+                location: selectedCountry,
+                contract: contractFilter,
+                alert: true,
+              },
+            ],
+          }
+        );
+        if (response.status === 200) {
+          console.log("Subscribed successfully");
+          setTrigger(!trigger);
+        } else {
+          console.log("User not found or error occurred.");
         }
-      );
-      if (response.status === 200) {
-        console.log("Subscribed successfully");
-        setTrigger(!trigger);
       } else {
-        console.log("User not found or error occurred.");
+        console.log("At least one field must be filled to subscribe.");
       }
     } catch (error) {
       console.error("Error:", error);
@@ -335,6 +435,9 @@ const Feed = () => {
         case "tags":
           setTagFilter("");
           break;
+        case "category":
+          setCategoryFilter("");
+          break;
         default:
           break;
       }
@@ -349,6 +452,9 @@ const Feed = () => {
         case "tags":
           setTagFilter(label);
           break;
+        case "category":
+          setCategoryFilter(label);
+          break;
         default:
           break;
       }
@@ -361,8 +467,11 @@ const Feed = () => {
   };
 
   const handleContractFilter = (value) => {
-    setContractFilter(value);
-    // You can perform additional actions based on the selected contract value
+    setContractFilter((prevFilter) => (prevFilter === value ? "" : value));
+  };
+
+  const handleCategoryFilter = (value) => {
+    setCategoryFilter((prevFilter) => (prevFilter === value ? "" : value));
   };
 
   return (
@@ -382,7 +491,6 @@ const Feed = () => {
             <SearchIcon fontSize="large" className="hover:text-green-600" />
           </AccordionSummary>
           <AccordionDetails className="bg-white p-6 w-full rounded-lg shadow-xl border-solid border-black">
-            Search Still under Development
             <div className="flex items-center">
               <div className="relative mr-4">
                 <input
@@ -477,22 +585,30 @@ const Feed = () => {
           </AccordionDetails>
         </Accordion>
       </div>
-      <div className="bg-gray-50 w-2/4 p-4 rounded-3xl">
-      <h1>Your Interests</h1>
-      <div className="w-3/4 flex flex-row my-4 justify-center items-center">
-        <div>
-          {recCat.recommendedCategories.map((category, index) => (
-            <Chip
-              key={index}
-              className="w-fit feed-chip mt-2 mr-2"
-              label={category}
-              size="medium"
-              color="success"
-            />
-          ))}
+      {currentUser && (
+        <div className="bg-gray-50 text-center w-2/4 p-1 rounded-3xl">
+          <h1>You seem interested in </h1>
+          <div className="w-3/4 text-center mx-auto flex flex-row my-1 justify-center items-center">
+            {recCat &&
+              recCat.recommendedCategories.map((category, index) => (
+                <div className="mx-5 text-center justify-center items-center">
+                  <Chip
+                    key={index}
+                    className="w-fit text-center feed-chip mt-2"
+                    label={category}
+                    variant={`${
+                      categoryFilter === category ? "filled" : "outlined"
+                    }`}
+                    size="medium"
+                    color="success"
+                    onClick={() => handleCategoryFilter(category)}
+                  />
+                </div>
+              ))}
+          </div>
         </div>
-      </div>
-    </div>
+      )}
+      <h1 className="text-sm">Quick Search </h1>
       <div className="w-3/4 flex flex-row justify-between my-4">
         <Chip
           className="w-fit feed-chip mt-2 mr-2"
@@ -711,26 +827,55 @@ const Feed = () => {
                           )}
                         </div>
                       </div>
-                      <FormControl className="w-fit border   cursor-pointer">
-                        <InputLabel
-                          variant="standard"
-                          htmlFor="uncontrolled-native"
-                        >
-                          Mark
-                        </InputLabel>
-                        <NativeSelect
-                          defaultValue={30}
-                          inputProps={{
-                            name: "mark",
-                            id: "uncontrolled-native",
-                          }}
-                          className="rounded-lg shadow-md "
-                        >
-                          <option value=""></option>
-                          <option value="Applied">Applied</option>
-                          <option value="Want to Apply">Want to Apply</option>
-                        </NativeSelect>
-                      </FormControl>
+                      {currentUser ? (
+                        <FormControl className="w-fit border cursor-pointer">
+                          <InputLabel
+                            variant="standard"
+                            htmlFor="uncontrolled-native"
+                          >
+                            Mark
+                          </InputLabel>
+                          <NativeSelect
+                            defaultValue={
+                              appliedJobs && appliedJobs.includes(job._id)
+                                ? "Applied"
+                                : wantToApply && wantToApply.includes(job._id)
+                                ? "Want to Apply"
+                                : ""
+                            }
+                            inputProps={{
+                              name: "mark",
+                              id: "uncontrolled-native",
+                            }}
+                            className="rounded-lg shadow-md"
+                            onChange={(event) =>
+                              handleMarkChange(event, job._id)
+                            }
+                          >
+                            <option value=""></option>
+                            <option value="Applied">Applied</option>
+                            <option value="Want to Apply">Want to Apply</option>
+                          </NativeSelect>
+                        </FormControl>
+                      ) : (
+                        <FormControl className="w-3/12 border cursor-pointer">
+                          <InputLabel
+                            variant="standard"
+                            htmlFor="uncontrolled-native"
+                          >
+                            Login To Mark
+                          </InputLabel>
+                          <NativeSelect
+                            inputProps={{
+                              name: "mark",
+                              id: "uncontrolled-native",
+                            }}
+                            className="rounded-lg shadow-md"
+                          >
+                            <option value=""></option>
+                          </NativeSelect>
+                        </FormControl>
+                      )}
                     </div>
                   </>
                 </>

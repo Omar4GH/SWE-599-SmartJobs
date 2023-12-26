@@ -7,8 +7,12 @@ import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import Edit from "@mui/icons-material/Edit";
 import CloseIcon from "@mui/icons-material/Close";
 import PaidIcon from "@mui/icons-material/Paid";
+import Accordion from "@mui/material/Accordion";
+import AccordionSummary from "@mui/material/AccordionSummary";
+import AccordionDetails from "@mui/material/AccordionDetails";
 import AlarmIcon from "@mui/icons-material/Alarm";
 import DoneIcon from "@mui/icons-material/Done";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import {
   Chip,
   CircularProgress,
@@ -17,6 +21,7 @@ import {
   NativeSelect,
 } from "@mui/material";
 import Button from "@mui/joy/Button";
+import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
 import Card from "@mui/joy/Card";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import moment from "moment";
@@ -37,6 +42,10 @@ const Profile = () => {
   const [nationalities, setNationalities] = useState([]);
   const [savedJobs, setSavedJobs] = useState(null);
   const [savedPostsIds, setSavedPostsIds] = useState([]);
+  const [appliedJobsIDs, setAppliedJobsIDs] = useState([]);
+  const [appliedJobs, setAppliedJobs] = useState([]);
+  const [wantToApplyIDs, setWantToApplyIDs] = useState([]);
+  const [wantToApply, setWantToApply] = useState([]);
   const [postedJobs, setPostedJobs] = useState([]);
   const [allUsers, setAllUsers] = useState([]);
 
@@ -51,6 +60,12 @@ const Profile = () => {
   useEffect(() => {
     if (currentUser && savedPostsIds && currentUser.type === "Job Seeker") {
       getSavedJobs();
+    }
+    if (currentUser && appliedJobsIDs && currentUser.type === "Job Seeker") {
+      getAppliedJobs();
+    }
+    if (currentUser && wantToApplyIDs && currentUser.type === "Job Seeker") {
+      getWantToApplyJobs();
     }
   }, [savedPostsIds, trigger]);
 
@@ -74,13 +89,14 @@ const Profile = () => {
       const res = await _axios.get(`users/${currentUser._id}`);
       setUserInfo(res.data);
       setSavedPostsIds(res.data.saved_posts);
+      setAppliedJobsIDs(res.data.applied);
+      setWantToApplyIDs(res.data.wantToApply);
       console.log(res.data);
     } catch (err) {
       console.log(err);
     }
   };
   const getSavedJobs = async () => {
-    console.log("IDS: " + savedPostsIds);
     _axios
       .get(`/jobs/saved?ids=${savedPostsIds.join(",")}`)
       .then((response) => {
@@ -94,6 +110,27 @@ const Profile = () => {
       });
   };
 
+  const getAppliedJobs = async () => {
+    _axios
+      .get(`/jobs/saved?ids=${appliedJobsIDs.join(",")}`)
+      .then((response) => {
+        setAppliedJobs(response.data);
+      })
+      .catch((error) => {
+        console.error("Error fetching Applied job posts:", error);
+      });
+  };
+
+  const getWantToApplyJobs = async () => {
+    _axios
+      .get(`/jobs/saved?ids=${wantToApplyIDs.join(",")}`)
+      .then((response) => {
+        setWantToApply(response.data);
+      })
+      .catch((error) => {
+        console.error("Error fetching Want To Apply job posts:", error);
+      });
+  };
   const removeSavedJob = async (jobId) => {
     try {
       const response = await _axios.post(
@@ -110,7 +147,22 @@ const Profile = () => {
       console.error("Error:", error);
     }
   };
-
+  const updateSavedJobs = async (jobId) => {
+    try {
+      const response = await _axios.post(
+        `/users/${currentUser._id}/saved-jobs`,
+        { jobId }
+      );
+      if (response.status === 200) {
+        console.log("Job saved successfully");
+        setTrigger(!trigger);
+      } else {
+        console.log("User not found or error occurred.");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
   const getUserJobs = async () => {
     try {
       const res = await _axios.get(`jobs/user/${currentUser._id}`);
@@ -317,6 +369,91 @@ const Profile = () => {
       console.error("Error while removing subscription:", error);
     }
   };
+  /////////////////////////// MARKING
+
+  /////////////////////////////////////////////////
+
+  const handleMarkChange = (event, jobId) => {
+    const selectedValue = event.target.value;
+
+    if (selectedValue === "Applied") {
+      updateAppliedJobs(jobId);
+    } else if (selectedValue === "Want to Apply") {
+      updateWantToApplyJobs(jobId);
+    }
+  };
+
+  /////////////////////////////////////////////////
+  const updateAppliedJobs = async (jobId) => {
+    try {
+      const response = await _axios.post(`/users/${currentUser._id}/applied`, {
+        jobId,
+      });
+      if (response.status === 200) {
+        console.log("Job Marked Applied successfully");
+        removeWantToApplyJobs(jobId);
+        setTrigger(!trigger);
+      } else {
+        console.log("User not found or error occurred.");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+
+  const removeAppliedJobs = async (jobId) => {
+    try {
+      const response = await _axios.post(
+        `/users/${currentUser._id}/applied/remove`,
+        { jobId }
+      );
+      if (response.status === 200) {
+        setTrigger(!trigger);
+        console.log("Job unSaved successfully");
+      } else {
+        console.log("User not found or error occurred.");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+  ///////////////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////////////
+  const updateWantToApplyJobs = async (jobId) => {
+    try {
+      const response = await _axios.post(
+        `/users/${currentUser._id}/wanttoapply`,
+        { jobId }
+      );
+      if (response.status === 200) {
+        removeAppliedJobs(jobId);
+        console.log("Job Marked Applied successfully");
+        setTrigger(!trigger);
+      } else {
+        console.log("User not found or error occurred.");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+
+  const removeWantToApplyJobs = async (jobId) => {
+    try {
+      const response = await _axios.post(
+        `/users/${currentUser._id}/wanttoapply/remove`,
+        { jobId }
+      );
+      if (response.status === 200) {
+        setTrigger(!trigger);
+        console.log("Job unSaved successfully");
+      } else {
+        console.log("User not found or error occurred.");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+  ///////////////////////////////////////////////////////////////
 
   return (
     <div className="min-h-screen bg-slate-100 py-12 px-4 sm:px-6 lg:px-8">
@@ -453,22 +590,6 @@ const Profile = () => {
                       />
                     </p>
                   </div>
-                  {currentUser.type == "Job Seeker" ? (
-                    <>
-                      <div className="mt-5">
-                        <h3 className="text-lg font-medium text-gray-900">
-                          Education
-                        </h3>
-                      </div>
-                      <div className="mt-5">
-                        <h3 className="text-lg font-medium text-gray-900">
-                          Experience
-                        </h3>
-                      </div>
-                    </>
-                  ) : (
-                    <></>
-                  )}
                 </div>
                 <div className="mt-5">
                   <h3 className="text-lg font-medium text-gray-900">Jobs</h3>
@@ -590,11 +711,11 @@ const Profile = () => {
                       </div>
                       {currentUser.type === "Job Seeker" ? (
                         <>
-                          <div className="mt-5">
+                          {/* <div className="mt-5">
                             <h3 className="text-lg font-medium text-gray-900">
                               Education
                             </h3>
-                            {/*
+                            
                         <div className="border text-xs rounded-lg p-2 bg-slate-100 mb-1">
                           <div className="flex justify-end">
                             <DeleteIcon fontSize="small" />
@@ -625,13 +746,13 @@ const Profile = () => {
                               <p>Turkey</p>
                             </div>
                           </div> 
-                        </div>*/}
-                          </div>
-                          <div className="mt-5">
+                        </div>
+                          </div>*/}
+                          {/* <div className="mt-5">
                             <h3 className="text-lg font-medium text-gray-900">
                               Experience
                             </h3>
-                            {/* 
+                            
                         <div className="border text-xs rounded-lg p-2 bg-slate-100 mb-1">
                           <div className="flex justify-end">
                             <DeleteIcon fontSize="small" />
@@ -662,8 +783,8 @@ const Profile = () => {
                               <p>dasdasdasd</p>
                             </div>
                           </div>
-                        </div>*/}
-                          </div>
+                        </div>
+                          </div>*/}
                         </>
                       ) : (
                         <></>
@@ -749,193 +870,692 @@ const Profile = () => {
                 {currentUser.type === "Job Seeker" ? (
                   <>
                     <div className="mt-5">
-                      <h3 className="text-lg font-medium text-gray-900">
-                        Saved Jobs
-                      </h3>
-                      <div className="flex flex-col items-center h-full">
-                        {savedJobs &&
-                          savedJobs.map((job) => (
-                            <>
-                              {" "}
-                              <div
-                                className=" transition w-full h-fit duration-300 ease-in-out transform hover:scale-105 hover:shadow-2xl mb-5 bg-gradient-to-b  text-gray-900 from-blue-50 to-blue-100  p-6 rounded-lg shadow-xl  max-w-xl mx-auto mt-8 border-solid border-black"
-                                style={{
-                                  fontFamily: "Montserrat, sans-serif",
-                                  boxShadow: "0px 4px 4px rgba(0, 0, 0, 0.25)",
-                                  borderRadius: "16px", // Adjust the value for the desired border radius
-                                }}
-                              >
-                                {" "}
-                                <Link to={`/job/${job._id}`}>
-                                  <div className="flex items-center justify-between mb-4">
-                                    <h1 className="text-lg font-medium">
-                                      {job?.title}
-                                    </h1>
-                                    <div className="flex text-sm items-center space-x-2">
-                                      <img
-                                        src={
-                                          job?.user?.[0].profileImage ||
-                                          defaultAvatar
-                                        }
-                                        alt="User Avatar"
-                                        style={{
-                                          width: "40px",
-                                          height: "40px",
-                                          borderRadius: "50%",
-                                          marginRight: 5,
-                                        }}
-                                      />
-                                      {job?.user?.[0]?.username || "Unknown"}
-                                    </div>
-                                  </div>
-                                  <div className="text-xs font-medium mb-2">
-                                    {job?.position}
-                                  </div>
+                      <Accordion
+                        sx={{
+                          backgroundColor: "transparent",
+                          boxShadow: "none",
+                          margin: 0,
+                        }}
+                      >
+                        <AccordionSummary
+                          expandIcon={<ExpandMoreIcon />}
+                          aria-controls="panel1a-content"
+                          id="panel1a-header"
+                          className="w-fit"
+                        >
+                          <h3 className="text-lg font-medium text-gray-900">
+                            {" "}
+                            Saved Jobs
+                          </h3>
+                        </AccordionSummary>
+                        <AccordionDetails>
+                          <div className="flex flex-col items-center h-full">
+                            {savedJobs &&
+                              savedJobs.map((job) => (
+                                <>
+                                  {" "}
                                   <div
-                                    className="mb-4 text-xs text-black"
-                                    dangerouslySetInnerHTML={{
-                                      __html:
-                                        job.description.slice(0, 85) + "...",
+                                    className=" transition w-full h-fit duration-300 ease-in-out transform hover:scale-105 hover:shadow-2xl mb-5 bg-gradient-to-b  text-gray-900 from-blue-50 to-blue-100  p-6 rounded-lg shadow-xl  max-w-xl mx-auto mt-8 border-solid border-black"
+                                    style={{
+                                      fontFamily: "Montserrat, sans-serif",
+                                      boxShadow:
+                                        "0px 4px 4px rgba(0, 0, 0, 0.25)",
+                                      borderRadius: "16px", // Adjust the value for the desired border radius
                                     }}
-                                  ></div>
-                                  <div className="flex text-xs items-center space-x-2">
-                                    <PaidIcon className="text-green-800 mr-1" />
-                                    {job.salary === "other"
-                                      ? job.specificSalary + " $/year"
-                                      : job.salary}
-                                  </div>
-                                </Link>
-                                <div className="flex flex-wrap items-center space-x-4">
-                                  <div className="flex text-xs items-center space-x-2">
-                                    <LocationOnIcon fontSize="medium" />
-                                    {job?.location}
-                                  </div>
-                                  <div className="flex text-xs items-center space-x-2">
-                                    <AccessTimeIcon fontSize="medium" />
-                                    {moment(job.postdate).fromNow()}
-                                  </div>
-                                  <div className="flex text-xs items-center space-x-2">
-                                    <AlarmIcon className="text-red-800 mr-1" />
-                                    {job?.deadline}
-                                  </div>
-                                  <div className="flex items-center text-xs space-x-2">
-                                    {job.likes &&
-                                    job.likes.includes(currentUser._id) ? (
-                                      <>
-                                        {" "}
-                                        <ThumbUpIcon
-                                          fontSize="large"
-                                          onClick={() => removeLike(job._id)}
-                                          className=" cursor-pointer hover:text-red-800"
-                                        />
-                                      </>
-                                    ) : (
-                                      <>
-                                        <ThumbUpOffAlt
-                                          fontSize="large"
-                                          onClick={() => likeJob(job._id)}
-                                          className=" cursor-pointer hover:text-blue-800"
-                                        />
-                                      </>
-                                    )}
-                                    {job?.likes.length}
-                                  </div>{" "}
-                                  {savedJobs && savedJobs.includes(job._id) ? (
-                                    <>
-                                      {" "}
-                                      <BookmarkRemoveIcon
-                                        fontSize="medium"
-                                        onClick={() => removeSavedJob(job._id)}
-                                        className=" cursor-pointer hover:text-red-800"
-                                      />
-                                    </>
-                                  ) : (
-                                    <>
-                                      <BookmarkRemoveIcon
-                                        fontSize="medium"
-                                        onClick={() => removeSavedJob(job._id)}
-                                        className=" cursor-pointer hover:text-red-800"
-                                      />
-                                    </>
-                                  )}
-                                </div>
-                                <div className="mt-3">
-                                  <div className="text-xs font-semibold">
-                                    Tags
-                                  </div>
-                                  <div className="flex space-x-2">
-                                    {job.tags && job.tags.length > 0 ? (
-                                      <div>
-                                        {job.tags
-                                          .slice(0, 5)
-                                          .map((tag, index) => (
-                                            <Chip
-                                              className="w-fit text-xs feed-chip mt-2 mr-2"
-                                              key={tag}
-                                              label={tag}
-                                              size="small"
-                                              color="primary"
-                                            />
-                                          ))}
-                                        {job.tags.length > 5 &&
-                                          job.tags.slice(5).length > 0 && (
-                                            <button
-                                              className="text-blue-500 text-xs float-right font-semibold mt-2 focus:outline-none"
-                                              onClick={() =>
-                                                handleShowMore(job._id)
-                                              }
-                                            >
-                                              {showMore[job.id]
-                                                ? "Show Less"
-                                                : `+${
-                                                    job.tags.slice(5).length
-                                                  } more`}
-                                            </button>
-                                          )}
-                                        {showMore[job._id] &&
-                                          job.tags
-                                            .slice(5)
-                                            .map((tag, index) => (
-                                              <Chip
-                                                className="w-fit text-xs feed-chip mt-2 mr-2"
-                                                key={tag}
-                                                label={tag}
-                                                size="small"
-                                                color="primary"
-                                              />
-                                            ))}
+                                  >
+                                    {" "}
+                                    <Link to={`/job/${job._id}`}>
+                                      <div className="flex items-center justify-between mb-4">
+                                        <h1 className="text-lg font-medium">
+                                          {job?.title}
+                                        </h1>
+                                        <div className="flex text-sm items-center space-x-2">
+                                          <img
+                                            src={
+                                              job?.user?.[0].profileImage ||
+                                              defaultAvatar
+                                            }
+                                            alt="User Avatar"
+                                            style={{
+                                              width: "40px",
+                                              height: "40px",
+                                              borderRadius: "50%",
+                                              marginRight: 5,
+                                            }}
+                                          />
+                                          {job?.user?.[0]?.username ||
+                                            "Unknown"}
+                                        </div>
                                       </div>
-                                    ) : (
-                                      <></>
-                                    )}
+                                      <div className="text-xs font-medium mb-2">
+                                        {job?.position}
+                                      </div>
+                                      <div
+                                        className="mb-4 text-xs text-black"
+                                        dangerouslySetInnerHTML={{
+                                          __html:
+                                            job.description.slice(0, 85) +
+                                            "...",
+                                        }}
+                                      ></div>
+                                      <div className="flex text-xs items-center space-x-2">
+                                        <PaidIcon className="text-green-800 mr-1" />
+                                        {job.salary === "other"
+                                          ? job.specificSalary + " $/year"
+                                          : job.salary}
+                                      </div>
+                                    </Link>
+                                    <div className="flex flex-wrap items-center space-x-4">
+                                      <div className="flex text-xs items-center space-x-2">
+                                        <LocationOnIcon fontSize="medium" />
+                                        {job?.location}
+                                      </div>
+                                      <div className="flex text-xs items-center space-x-2">
+                                        <AccessTimeIcon fontSize="medium" />
+                                        {moment(job.postdate).fromNow()}
+                                      </div>
+                                      <div className="flex text-xs items-center space-x-2">
+                                        <AlarmIcon className="text-red-800 mr-1" />
+                                        {job?.deadline}
+                                      </div>
+                                      <div className="flex items-center text-xs space-x-2">
+                                        {job.likes &&
+                                        job.likes.includes(currentUser._id) ? (
+                                          <>
+                                            {" "}
+                                            <ThumbUpIcon
+                                              fontSize="large"
+                                              onClick={() =>
+                                                removeLike(job._id)
+                                              }
+                                              className=" cursor-pointer hover:text-red-800"
+                                            />
+                                          </>
+                                        ) : (
+                                          <>
+                                            <ThumbUpOffAlt
+                                              fontSize="large"
+                                              onClick={() => likeJob(job._id)}
+                                              className=" cursor-pointer hover:text-blue-800"
+                                            />
+                                          </>
+                                        )}
+                                        {job?.likes.length}
+                                      </div>{" "}
+                                      {savedJobs &&
+                                      savedJobs.includes(job._id) ? (
+                                        <>
+                                          {" "}
+                                          <BookmarkBorderIcon
+                                            fontSize="medium"
+                                            onClick={() =>
+                                              updateSavedJobs(job._id)
+                                            }
+                                            className=" cursor-pointer hover:text-blue-800"
+                                          />
+                                        </>
+                                      ) : (
+                                        <>
+                                          <BookmarkRemoveIcon
+                                            fontSize="medium"
+                                            onClick={() =>
+                                              removeSavedJob(job._id)
+                                            }
+                                            className=" cursor-pointer hover:text-red-800"
+                                          />
+                                        </>
+                                      )}
+                                    </div>
+                                    <div className="mt-3">
+                                      <div className="text-xs font-semibold">
+                                        Tags
+                                      </div>
+                                      <div className="flex space-x-2">
+                                        {job.tags && job.tags.length > 0 ? (
+                                          <div>
+                                            {job.tags
+                                              .slice(0, 5)
+                                              .map((tag, index) => (
+                                                <Chip
+                                                  className="w-fit text-xs feed-chip mt-2 mr-2"
+                                                  key={tag}
+                                                  label={tag}
+                                                  size="small"
+                                                  color="primary"
+                                                />
+                                              ))}
+                                            {job.tags.length > 5 &&
+                                              job.tags.slice(5).length > 0 && (
+                                                <button
+                                                  className="text-blue-500 text-xs float-right font-semibold mt-2 focus:outline-none"
+                                                  onClick={() =>
+                                                    handleShowMore(job._id)
+                                                  }
+                                                >
+                                                  {showMore[job.id]
+                                                    ? "Show Less"
+                                                    : `+${
+                                                        job.tags.slice(5).length
+                                                      } more`}
+                                                </button>
+                                              )}
+                                            {showMore[job._id] &&
+                                              job.tags
+                                                .slice(5)
+                                                .map((tag, index) => (
+                                                  <Chip
+                                                    className="w-fit text-xs feed-chip mt-2 mr-2"
+                                                    key={tag}
+                                                    label={tag}
+                                                    size="small"
+                                                    color="primary"
+                                                  />
+                                                ))}
+                                          </div>
+                                        ) : (
+                                          <></>
+                                        )}
+                                      </div>
+                                    </div>
+                                    <FormControl className="w-fit border cursor-pointer">
+                                      <InputLabel
+                                        variant="standard"
+                                        htmlFor="uncontrolled-native"
+                                      >
+                                        Mark
+                                      </InputLabel>
+                                      <NativeSelect
+                                        defaultValue={
+                                          appliedJobs &&
+                                          appliedJobs.includes(job._id)
+                                            ? "Applied"
+                                            : wantToApply &&
+                                              wantToApply.includes(job._id)
+                                            ? "Want to Apply"
+                                            : ""
+                                        }
+                                        inputProps={{
+                                          name: "mark",
+                                          id: "uncontrolled-native",
+                                        }}
+                                        className="rounded-lg shadow-md"
+                                        onChange={(event) =>
+                                          handleMarkChange(event, job._id)
+                                        }
+                                      >
+                                        <option value=""></option>
+                                        <option value="Applied">Applied</option>
+                                        <option value="Want to Apply">
+                                          Want to Apply
+                                        </option>
+                                      </NativeSelect>
+                                    </FormControl>
                                   </div>
-                                </div>
-                                <FormControl className="w-fit border   cursor-pointer">
-                                  <InputLabel
-                                    variant="standard"
-                                    htmlFor="uncontrolled-native"
-                                  >
-                                    Mark
-                                  </InputLabel>
-                                  <NativeSelect
-                                    defaultValue={30}
-                                    inputProps={{
-                                      name: "mark",
-                                      id: "uncontrolled-native",
+                                </>
+                              ))}
+                          </div>
+                        </AccordionDetails>
+                      </Accordion>
+                    </div>
+                    {/* Applied Jobs */}
+                    <div className="mt-5">
+                      <Accordion
+                        sx={{
+                          backgroundColor: "transparent",
+                          boxShadow: "none",
+                          margin: 0,
+                        }}
+                      >
+                        <AccordionSummary
+                          expandIcon={<ExpandMoreIcon />}
+                          aria-controls="panel1a-content"
+                          id="panel1a-header"
+                          className="w-fit"
+                        >
+                          <h3 className="text-lg font-medium text-gray-900">
+                            {" "}
+                            Applied To Jobs
+                          </h3>
+                        </AccordionSummary>
+                        <AccordionDetails>
+                          <div className="flex flex-col items-center h-full">
+                            {appliedJobs &&
+                              appliedJobs.map((job) => (
+                                <>
+                                  {" "}
+                                  <div
+                                    className=" transition w-full h-fit duration-300 ease-in-out transform hover:scale-105 hover:shadow-2xl mb-5 bg-gradient-to-b  text-gray-900 from-blue-50 to-blue-100  p-6 rounded-lg shadow-xl  max-w-xl mx-auto mt-8 border-solid border-black"
+                                    style={{
+                                      fontFamily: "Montserrat, sans-serif",
+                                      boxShadow:
+                                        "0px 4px 4px rgba(0, 0, 0, 0.25)",
+                                      borderRadius: "16px", // Adjust the value for the desired border radius
                                     }}
-                                    className="rounded-lg shadow-md "
                                   >
-                                    <option value=""></option>
-                                    <option value="Applied">Applied</option>
-                                    <option value="Want to Apply">
-                                      Want to Apply
-                                    </option>
-                                  </NativeSelect>
-                                </FormControl>
-                              </div>
-                            </>
-                          ))}
-                      </div>
+                                    {" "}
+                                    <Link to={`/job/${job._id}`}>
+                                      <div className="flex items-center justify-between mb-4">
+                                        <h1 className="text-lg font-medium">
+                                          {job?.title}
+                                        </h1>
+                                        <div className="flex text-sm items-center space-x-2">
+                                          <img
+                                            src={
+                                              job?.user?.[0].profileImage ||
+                                              defaultAvatar
+                                            }
+                                            alt="User Avatar"
+                                            style={{
+                                              width: "40px",
+                                              height: "40px",
+                                              borderRadius: "50%",
+                                              marginRight: 5,
+                                            }}
+                                          />
+                                          {job?.user?.[0]?.username ||
+                                            "Unknown"}
+                                        </div>
+                                      </div>
+                                      <div className="text-xs font-medium mb-2">
+                                        {job?.position}
+                                      </div>
+                                      <div
+                                        className="mb-4 text-xs text-black"
+                                        dangerouslySetInnerHTML={{
+                                          __html:
+                                            job.description.slice(0, 85) +
+                                            "...",
+                                        }}
+                                      ></div>
+                                      <div className="flex text-xs items-center space-x-2">
+                                        <PaidIcon className="text-green-800 mr-1" />
+                                        {job.salary === "other"
+                                          ? job.specificSalary + " $/year"
+                                          : job.salary}
+                                      </div>
+                                    </Link>
+                                    <div className="flex flex-wrap items-center space-x-4">
+                                      <div className="flex text-xs items-center space-x-2">
+                                        <LocationOnIcon fontSize="medium" />
+                                        {job?.location}
+                                      </div>
+                                      <div className="flex text-xs items-center space-x-2">
+                                        <AccessTimeIcon fontSize="medium" />
+                                        {moment(job.postdate).fromNow()}
+                                      </div>
+                                      <div className="flex text-xs items-center space-x-2">
+                                        <AlarmIcon className="text-red-800 mr-1" />
+                                        {job?.deadline}
+                                      </div>
+                                      <div className="flex items-center text-xs space-x-2">
+                                        {job.likes &&
+                                        job.likes.includes(currentUser._id) ? (
+                                          <>
+                                            {" "}
+                                            <ThumbUpIcon
+                                              fontSize="large"
+                                              onClick={() =>
+                                                removeLike(job._id)
+                                              }
+                                              className=" cursor-pointer hover:text-red-800"
+                                            />
+                                          </>
+                                        ) : (
+                                          <>
+                                            <ThumbUpOffAlt
+                                              fontSize="large"
+                                              onClick={() => likeJob(job._id)}
+                                              className=" cursor-pointer hover:text-blue-800"
+                                            />
+                                          </>
+                                        )}
+                                        {job?.likes.length}
+                                      </div>{" "}
+                                      {savedJobs &&
+                                      savedJobs.includes(job._id) ? (
+                                        <>
+                                          {" "}
+                                          <BookmarkBorderIcon
+                                            fontSize="medium"
+                                            onClick={() =>
+                                              updateSavedJobs(job._id)
+                                            }
+                                            className=" cursor-pointer hover:text-blue-800"
+                                          />
+                                        </>
+                                      ) : (
+                                        <>
+                                          <BookmarkRemoveIcon
+                                            fontSize="medium"
+                                            onClick={() =>
+                                              removeSavedJob(job._id)
+                                            }
+                                            className=" cursor-pointer hover:text-red-800"
+                                          />
+                                        </>
+                                      )}
+                                    </div>
+                                    <div className="mt-3">
+                                      <div className="text-xs font-semibold">
+                                        Tags
+                                      </div>
+                                      <div className="flex space-x-2">
+                                        {job.tags && job.tags.length > 0 ? (
+                                          <div>
+                                            {job.tags
+                                              .slice(0, 5)
+                                              .map((tag, index) => (
+                                                <Chip
+                                                  className="w-fit text-xs feed-chip mt-2 mr-2"
+                                                  key={tag}
+                                                  label={tag}
+                                                  size="small"
+                                                  color="primary"
+                                                />
+                                              ))}
+                                            {job.tags.length > 5 &&
+                                              job.tags.slice(5).length > 0 && (
+                                                <button
+                                                  className="text-blue-500 text-xs float-right font-semibold mt-2 focus:outline-none"
+                                                  onClick={() =>
+                                                    handleShowMore(job._id)
+                                                  }
+                                                >
+                                                  {showMore[job.id]
+                                                    ? "Show Less"
+                                                    : `+${
+                                                        job.tags.slice(5).length
+                                                      } more`}
+                                                </button>
+                                              )}
+                                            {showMore[job._id] &&
+                                              job.tags
+                                                .slice(5)
+                                                .map((tag, index) => (
+                                                  <Chip
+                                                    className="w-fit text-xs feed-chip mt-2 mr-2"
+                                                    key={tag}
+                                                    label={tag}
+                                                    size="small"
+                                                    color="primary"
+                                                  />
+                                                ))}
+                                          </div>
+                                        ) : (
+                                          <></>
+                                        )}
+                                      </div>
+                                    </div>
+                                    <FormControl className="w-fit border cursor-pointer">
+                                      <InputLabel
+                                        variant="standard"
+                                        htmlFor="uncontrolled-native"
+                                      >
+                                        Mark
+                                      </InputLabel>
+                                      <NativeSelect
+                                        defaultValue={
+                                          appliedJobsIDs &&
+                                          appliedJobsIDs.includes(job._id)
+                                            ? "Applied"
+                                            : wantToApplyIDs &&
+                                              wantToApplyIDs.includes(job._id)
+                                            ? "Want to Apply"
+                                            : ""
+                                        }
+                                        inputProps={{
+                                          name: "mark",
+                                          id: "uncontrolled-native",
+                                        }}
+                                        className="rounded-lg shadow-md"
+                                        onChange={(event) =>
+                                          handleMarkChange(event, job._id)
+                                        }
+                                      >
+                                        <option value=""></option>
+                                        <option value="Applied">Applied</option>
+                                        <option value="Want to Apply">
+                                          Want to Apply
+                                        </option>
+                                      </NativeSelect>
+                                    </FormControl>
+                                  </div>
+                                </>
+                              ))}
+                          </div>
+                        </AccordionDetails>
+                      </Accordion>
+                    </div>
+
+                    {/* Want To Apply Jobs */}
+
+                    <div className="mt-5">
+                      <Accordion
+                        sx={{
+                          backgroundColor: "transparent",
+                          boxShadow: "none",
+                          margin: 0,
+                        }}
+                      >
+                        <AccordionSummary
+                          expandIcon={<ExpandMoreIcon />}
+                          aria-controls="panel1a-content"
+                          id="panel1a-header"
+                          className="w-fit"
+                        >
+                          <h3 className="text-lg font-medium text-gray-900">
+                            {" "}
+                            Want To Apply To Jobs
+                          </h3>
+                        </AccordionSummary>
+                        <AccordionDetails>
+                          <div className="flex flex-col items-center h-full">
+                            {wantToApply &&
+                              wantToApply.map((job) => (
+                                <>
+                                  {" "}
+                                  <div
+                                    className=" transition w-full h-fit duration-300 ease-in-out transform hover:scale-105 hover:shadow-2xl mb-5 bg-gradient-to-b  text-gray-900 from-blue-50 to-blue-100  p-6 rounded-lg shadow-xl  max-w-xl mx-auto mt-8 border-solid border-black"
+                                    style={{
+                                      fontFamily: "Montserrat, sans-serif",
+                                      boxShadow:
+                                        "0px 4px 4px rgba(0, 0, 0, 0.25)",
+                                      borderRadius: "16px", // Adjust the value for the desired border radius
+                                    }}
+                                  >
+                                    {" "}
+                                    <Link to={`/job/${job._id}`}>
+                                      <div className="flex items-center justify-between mb-4">
+                                        <h1 className="text-lg font-medium">
+                                          {job?.title}
+                                        </h1>
+                                        <div className="flex text-sm items-center space-x-2">
+                                          <img
+                                            src={
+                                              job?.user?.[0].profileImage ||
+                                              defaultAvatar
+                                            }
+                                            alt="User Avatar"
+                                            style={{
+                                              width: "40px",
+                                              height: "40px",
+                                              borderRadius: "50%",
+                                              marginRight: 5,
+                                            }}
+                                          />
+                                          {job?.user?.[0]?.username ||
+                                            "Unknown"}
+                                        </div>
+                                      </div>
+                                      <div className="text-xs font-medium mb-2">
+                                        {job?.position}
+                                      </div>
+                                      <div
+                                        className="mb-4 text-xs text-black"
+                                        dangerouslySetInnerHTML={{
+                                          __html:
+                                            job.description.slice(0, 85) +
+                                            "...",
+                                        }}
+                                      ></div>
+                                      <div className="flex text-xs items-center space-x-2">
+                                        <PaidIcon className="text-green-800 mr-1" />
+                                        {job.salary === "other"
+                                          ? job.specificSalary + " $/year"
+                                          : job.salary}
+                                      </div>
+                                    </Link>
+                                    <div className="flex flex-wrap items-center space-x-4">
+                                      <div className="flex text-xs items-center space-x-2">
+                                        <LocationOnIcon fontSize="medium" />
+                                        {job?.location}
+                                      </div>
+                                      <div className="flex text-xs items-center space-x-2">
+                                        <AccessTimeIcon fontSize="medium" />
+                                        {moment(job.postdate).fromNow()}
+                                      </div>
+                                      <div className="flex text-xs items-center space-x-2">
+                                        <AlarmIcon className="text-red-800 mr-1" />
+                                        {job?.deadline}
+                                      </div>
+                                      <div className="flex items-center text-xs space-x-2">
+                                        {job.likes &&
+                                        job.likes.includes(currentUser._id) ? (
+                                          <>
+                                            {" "}
+                                            <ThumbUpIcon
+                                              fontSize="large"
+                                              onClick={() =>
+                                                removeLike(job._id)
+                                              }
+                                              className=" cursor-pointer hover:text-red-800"
+                                            />
+                                          </>
+                                        ) : (
+                                          <>
+                                            <ThumbUpOffAlt
+                                              fontSize="large"
+                                              onClick={() => likeJob(job._id)}
+                                              className=" cursor-pointer hover:text-blue-800"
+                                            />
+                                          </>
+                                        )}
+                                        {job?.likes.length}
+                                      </div>{" "}
+                                      {savedJobs &&
+                                      savedJobs.includes(job._id) ? (
+                                        <>
+                                          {" "}
+                                          <BookmarkBorderIcon
+                                            fontSize="medium"
+                                            onClick={() =>
+                                              updateSavedJobs(job._id)
+                                            }
+                                            className=" cursor-pointer hover:text-blue-800"
+                                          />
+                                        </>
+                                      ) : (
+                                        <>
+                                          <BookmarkRemoveIcon
+                                            fontSize="medium"
+                                            onClick={() =>
+                                              removeSavedJob(job._id)
+                                            }
+                                            className=" cursor-pointer hover:text-red-800"
+                                          />
+                                        </>
+                                      )}
+                                    </div>
+                                    <div className="mt-3">
+                                      <div className="text-xs font-semibold">
+                                        Tags
+                                      </div>
+                                      <div className="flex space-x-2">
+                                        {job.tags && job.tags.length > 0 ? (
+                                          <div>
+                                            {job.tags
+                                              .slice(0, 5)
+                                              .map((tag, index) => (
+                                                <Chip
+                                                  className="w-fit text-xs feed-chip mt-2 mr-2"
+                                                  key={tag}
+                                                  label={tag}
+                                                  size="small"
+                                                  color="primary"
+                                                />
+                                              ))}
+                                            {job.tags.length > 5 &&
+                                              job.tags.slice(5).length > 0 && (
+                                                <button
+                                                  className="text-blue-500 text-xs float-right font-semibold mt-2 focus:outline-none"
+                                                  onClick={() =>
+                                                    handleShowMore(job._id)
+                                                  }
+                                                >
+                                                  {showMore[job.id]
+                                                    ? "Show Less"
+                                                    : `+${
+                                                        job.tags.slice(5).length
+                                                      } more`}
+                                                </button>
+                                              )}
+                                            {showMore[job._id] &&
+                                              job.tags
+                                                .slice(5)
+                                                .map((tag, index) => (
+                                                  <Chip
+                                                    className="w-fit text-xs feed-chip mt-2 mr-2"
+                                                    key={tag}
+                                                    label={tag}
+                                                    size="small"
+                                                    color="primary"
+                                                  />
+                                                ))}
+                                          </div>
+                                        ) : (
+                                          <></>
+                                        )}
+                                      </div>
+                                    </div>
+                                    <FormControl className="w-fit border cursor-pointer">
+                                      <InputLabel
+                                        variant="standard"
+                                        htmlFor="uncontrolled-native"
+                                      >
+                                        Mark
+                                      </InputLabel>
+                                      <NativeSelect
+                                        defaultValue={
+                                          appliedJobsIDs &&
+                                          appliedJobsIDs.includes(job._id)
+                                            ? "Applied"
+                                            : wantToApplyIDs &&
+                                              wantToApplyIDs.includes(job._id)
+                                            ? "Want to Apply"
+                                            : ""
+                                        }
+                                        inputProps={{
+                                          name: "mark",
+                                          id: "uncontrolled-native",
+                                        }}
+                                        className="rounded-lg shadow-md"
+                                        onChange={(event) =>
+                                          handleMarkChange(event, job._id)
+                                        }
+                                      >
+                                        <option value=""></option>
+                                        <option value="Applied">Applied</option>
+                                        <option value="Want to Apply">
+                                          Want to Apply
+                                        </option>
+                                      </NativeSelect>
+                                    </FormControl>
+                                  </div>
+                                </>
+                              ))}
+                          </div>
+                        </AccordionDetails>
+                      </Accordion>
                     </div>
                   </>
                 ) : (
@@ -989,6 +1609,12 @@ const Profile = () => {
                                         job.description.slice(0, 85) + "...",
                                     }}
                                   ></div>
+                                  <div className="flex text-xs items-center space-x-2">
+                                    <PaidIcon className="text-green-800 mr-1" />
+                                    {job.salary === "other"
+                                      ? job.specificSalary + " $/year"
+                                      : job.salary}
+                                  </div>
                                 </Link>
                                 <div className="flex flex-wrap items-center space-x-4">
                                   <div className="flex text-xs items-center space-x-2">
@@ -1011,6 +1637,10 @@ const Profile = () => {
                                     )}
                                     {job?.likes.length}
                                   </div>{" "}
+                                  <div className="flex text-xs items-center space-x-2">
+                                    <AlarmIcon className="text-red-800 mr-1" />
+                                    {job?.deadline}
+                                  </div>
                                   <DeleteIcon
                                     onClick={() => deleteJob(job._id)}
                                     className="cursor-pointer hover:text-red-800"

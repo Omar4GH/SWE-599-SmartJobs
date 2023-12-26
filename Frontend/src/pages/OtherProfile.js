@@ -27,7 +27,7 @@ import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import BookmarkIcon from "@mui/icons-material/Bookmark";
 import BookmarkRemoveIcon from "@mui/icons-material/BookmarkRemove";
 import { Link, useLocation } from "react-router-dom";
-import defaultAvatar from "../assets/default-avatar.jpg"
+import defaultAvatar from "../assets/default-avatar.jpg";
 
 const OtherProfile = () => {
   const { currentUser } = useContext(AuthContext);
@@ -40,6 +40,8 @@ const OtherProfile = () => {
   const [trigger, setTrigger] = useState(false);
 
   const [postedJobs, setPostedJobs] = useState([]);
+  const [appliedJobs, setAppliedJobs] = useState([]);
+  const [wantToApply, setWantToApply] = useState([]);
 
   useEffect(() => {
     getOtherUser();
@@ -77,7 +79,8 @@ const OtherProfile = () => {
   const getUser = async () => {
     try {
       const res = await _axios.get(`users/${currentUser._id}`);
-
+      setAppliedJobs(res.data.applied);
+      setWantToApply(res.data.wantToApply);
       setSavedPosts(res.data.saved_posts);
       console.log(res.data);
     } catch (err) {
@@ -121,10 +124,9 @@ const OtherProfile = () => {
   ////////////////////////////////////
   const likeJob = async (jobId) => {
     try {
-      const response = await _axios.post(
-        `/jobs/${jobId}/like-job`,
-        { userId: currentUser._id }
-      );
+      const response = await _axios.post(`/jobs/${jobId}/like-job`, {
+        userId: currentUser._id,
+      });
       if (response.status === 200) {
         console.log("Job LIKED successfully");
         setTrigger(!trigger);
@@ -138,10 +140,9 @@ const OtherProfile = () => {
 
   const removeLike = async (jobId) => {
     try {
-      const response = await _axios.post(
-        `/jobs/${jobId}/like-job/remove`,
-        { userId: currentUser._id }
-      );
+      const response = await _axios.post(`/jobs/${jobId}/like-job/remove`, {
+        userId: currentUser._id,
+      });
       if (response.status === 200) {
         setTrigger(!trigger);
         console.log("Job unLIKED successfully");
@@ -153,6 +154,90 @@ const OtherProfile = () => {
     }
   };
   ///////////////////////////////////
+
+  /////////////////////////////////////////////////
+
+  const handleMarkChange = (event, jobId) => {
+    const selectedValue = event.target.value;
+
+    if (selectedValue === "Applied") {
+      updateAppliedJobs(jobId);
+    } else if (selectedValue === "Want to Apply") {
+      updateWantToApplyJobs(jobId);
+    }
+  };
+
+  /////////////////////////////////////////////////
+  const updateAppliedJobs = async (jobId) => {
+    try {
+      const response = await _axios.post(`/users/${currentUser._id}/applied`, {
+        jobId,
+      });
+      if (response.status === 200) {
+        console.log("Job Marked Applied successfully");
+        removeWantToApplyJobs(jobId);
+        setTrigger(!trigger);
+      } else {
+        console.log("User not found or error occurred.");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+
+  const removeAppliedJobs = async (jobId) => {
+    try {
+      const response = await _axios.post(
+        `/users/${currentUser._id}/applied/remove`,
+        { jobId }
+      );
+      if (response.status === 200) {
+        setTrigger(!trigger);
+        console.log("Job unSaved successfully");
+      } else {
+        console.log("User not found or error occurred.");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+  ///////////////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////////////
+  const updateWantToApplyJobs = async (jobId) => {
+    try {
+      const response = await _axios.post(
+        `/users/${currentUser._id}/wanttoapply`,
+        { jobId }
+      );
+      if (response.status === 200) {
+        removeAppliedJobs(jobId);
+        console.log("Job Marked Applied successfully");
+        setTrigger(!trigger);
+      } else {
+        console.log("User not found or error occurred.");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+
+  const removeWantToApplyJobs = async (jobId) => {
+    try {
+      const response = await _axios.post(
+        `/users/${currentUser._id}/wanttoapply/remove`,
+        { jobId }
+      );
+      if (response.status === 200) {
+        setTrigger(!trigger);
+        console.log("Job unSaved successfully");
+      } else {
+        console.log("User not found or error occurred.");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+  ///////////////////////////////////////////////////////////////
 
   const [showMore, setShowMore] = useState({});
   const handleShowMore = (jobId) => {
@@ -176,10 +261,8 @@ const OtherProfile = () => {
             <div className="max-w-4xl mx-auto bg-white rounded-3xl px-14 py-1">
               <div className="text-center">
                 <img
-                    src={
-                      userInfo.profileImage ||
-                      defaultAvatar
-                    } alt="Profile Picture"
+                  src={userInfo.profileImage || defaultAvatar}
+                  alt="Profile Picture"
                   className="mx-auto h-24 w-24 rounded-full"
                 />
                 <p className="mt-2 text-sm text-gray-500">{userInfo.title}</p>
@@ -324,10 +407,11 @@ const OtherProfile = () => {
                                   </h1>
                                   <div className="flex text-sm items-center space-x-2">
                                     <img
-                                        src={
-                                          job?.user?.[0].profileImage ||
-                                          defaultAvatar
-                                        } alt="User Avatar"
+                                      src={
+                                        job?.user?.[0].profileImage ||
+                                        defaultAvatar
+                                      }
+                                      alt="User Avatar"
                                       style={{
                                         width: "40px",
                                         height: "40px",
@@ -348,12 +432,12 @@ const OtherProfile = () => {
                                       job.description.slice(0, 85) + "...",
                                   }}
                                 ></div>
-                                    <div className="flex text-xs items-center space-x-2">
-                                    <PaidIcon className="text-green-800 mr-1" />
-                                    {job.salary === "other"
-                                      ? job.specificSalary + " $/year"
-                                      : job.salary}
-                                  </div>
+                                <div className="flex text-xs items-center space-x-2">
+                                  <PaidIcon className="text-green-800 mr-1" />
+                                  {job.salary === "other"
+                                    ? job.specificSalary + " $/year"
+                                    : job.salary}
+                                </div>
                               </Link>
                               <div className="flex flex-wrap items-center space-x-4">
                                 <div className="flex text-xs items-center space-x-2">
@@ -361,32 +445,33 @@ const OtherProfile = () => {
                                   {job?.location}
                                 </div>
                                 <div className="flex text-xs items-center space-x-2">
-                                  <AccessTimeIcon fontSize="medium"/>
+                                  <AccessTimeIcon fontSize="medium" />
                                   {moment(job.postdate).fromNow()}
                                 </div>
                                 <div className="flex text-xs items-center space-x-2">
-                                    <AlarmIcon className="text-red-800 mr-1" />
-                                    {job?.deadline}
-                                  </div>
+                                  <AlarmIcon className="text-red-800 mr-1" />
+                                  {job?.deadline}
+                                </div>
                                 <div className="flex items-center text-xs space-x-2">
-                                {job.likes && job.likes.includes(currentUser._id) ? (
-                  <>
-                    {" "}
-                    <ThumbUpIcon
-                      fontSize="medium"
-                      onClick={() => removeLike(job._id)}
-                      className=" cursor-pointer hover:text-red-800"
-                    />
-                  </>
-                ) : (
-                  <>
-                    <ThumbUpOffAlt
-                      fontSize="medium"
-                      onClick={() => likeJob(job._id)}
-                      className=" cursor-pointer hover:text-blue-800"
-                    />
-                  </>
-                )}
+                                  {job.likes &&
+                                  job.likes.includes(currentUser._id) ? (
+                                    <>
+                                      {" "}
+                                      <ThumbUpIcon
+                                        fontSize="medium"
+                                        onClick={() => removeLike(job._id)}
+                                        className=" cursor-pointer hover:text-red-800"
+                                      />
+                                    </>
+                                  ) : (
+                                    <>
+                                      <ThumbUpOffAlt
+                                        fontSize="medium"
+                                        onClick={() => likeJob(job._id)}
+                                        className=" cursor-pointer hover:text-blue-800"
+                                      />
+                                    </>
+                                  )}
                                   {job?.likes.length}
                                 </div>{" "}
                                 {savedPosts && savedPosts.includes(job._id) ? (
@@ -459,28 +544,59 @@ const OtherProfile = () => {
                                   )}
                                 </div>
                               </div>
-                              <FormControl className="w-fit border   cursor-pointer">
-                                <InputLabel
-                                  variant="standard"
-                                  htmlFor="uncontrolled-native"
-                                >
-                                  Mark
-                                </InputLabel>
-                                <NativeSelect
-                                  defaultValue={30}
-                                  inputProps={{
-                                    name: "mark",
-                                    id: "uncontrolled-native",
-                                  }}
-                                  className="rounded-lg shadow-md "
-                                >
-                                  <option value=""></option>
-                                  <option value="Applied">Applied</option>
-                                  <option value="Want to Apply">
-                                    Want to Apply
-                                  </option>
-                                </NativeSelect>
-                              </FormControl>
+                              {currentUser ? (
+                                <FormControl className="w-fit border cursor-pointer">
+                                  <InputLabel
+                                    variant="standard"
+                                    htmlFor="uncontrolled-native"
+                                  >
+                                    Mark
+                                  </InputLabel>
+                                  <NativeSelect
+                                    defaultValue={
+                                      appliedJobs &&
+                                      appliedJobs.includes(job._id)
+                                        ? "Applied"
+                                        : wantToApply &&
+                                          wantToApply.includes(job._id)
+                                        ? "Want to Apply"
+                                        : ""
+                                    }
+                                    inputProps={{
+                                      name: "mark",
+                                      id: "uncontrolled-native",
+                                    }}
+                                    className="rounded-lg shadow-md"
+                                    onChange={(event) =>
+                                      handleMarkChange(event, job._id)
+                                    }
+                                  >
+                                    <option value=""></option>
+                                    <option value="Applied">Applied</option>
+                                    <option value="Want to Apply">
+                                      Want to Apply
+                                    </option>
+                                  </NativeSelect>
+                                </FormControl>
+                              ) : (
+                                <FormControl className="w-3/12 border cursor-pointer">
+                                  <InputLabel
+                                    variant="standard"
+                                    htmlFor="uncontrolled-native"
+                                  >
+                                    Login To Mark
+                                  </InputLabel>
+                                  <NativeSelect
+                                    inputProps={{
+                                      name: "mark",
+                                      id: "uncontrolled-native",
+                                    }}
+                                    className="rounded-lg shadow-md"
+                                  >
+                                    <option value=""></option>
+                                  </NativeSelect>
+                                </FormControl>
+                              )}
                             </div>
                           </>
                         ))}

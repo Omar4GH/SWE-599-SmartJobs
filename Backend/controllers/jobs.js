@@ -64,7 +64,13 @@ export const getJobs = async (req, res) => {
           },
         });
       }
-
+      if (req.query.category) {
+        pipeline.unshift({
+          $match: {
+            category: { $regex: new RegExp(req.query.category, 'i') },
+          },
+        });
+      }
       const jobs = await dbname.collection("jobs").aggregate(pipeline).toArray();
 
     // Debugging: Log the jobs to the console
