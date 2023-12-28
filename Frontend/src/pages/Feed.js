@@ -201,9 +201,11 @@ const Feed = () => {
 
   const removeAppliedJobs = async (jobId) => {
     try {
-      const response = await _axios.post(
+      const response = await _axios.delete(
         `/users/${currentUser._id}/applied/remove`,
-        { jobId }
+        {
+          data: { jobId },
+        }
       );
       if (response.status === 200) {
         setTrigger(!trigger);
@@ -237,9 +239,11 @@ const Feed = () => {
 
   const removeWantToApplyJobs = async (jobId) => {
     try {
-      const response = await _axios.post(
+      const response = await _axios.delete(
         `/users/${currentUser._id}/wanttoapply/remove`,
-        { jobId }
+        {
+          data: { jobId },
+        }
       );
       if (response.status === 200) {
         setTrigger(!trigger);

@@ -345,20 +345,21 @@ const Profile = () => {
     }
   };
 
-  const handleRemoveSubscribed = async (index) => {
+  const handleRemoveSubscribed = async (subscribed) => {
+    console.log(subscribed);
     try {
       const response = await _axios.delete(
         `/users/${userInfo._id}/subscribe-search/remove`,
         {
-          index,
-        }
+          data: { subscribed }, // Send subscribed in the request body
+      }
       );
 
       if (response.status === 200) {
         // Update the local state if the subscription is removed successfully
         setUserInfo((prevUser) => {
           const newSubscribed = [...prevUser.subscribed];
-          newSubscribed.splice(index, 1);
+          newSubscribed.splice(subscribed, 1);
           return { ...prevUser, subscribed: newSubscribed };
         });
         setTrigger(!trigger);
@@ -403,9 +404,11 @@ const Profile = () => {
 
   const removeAppliedJobs = async (jobId) => {
     try {
-      const response = await _axios.post(
+      const response = await _axios.delete(
         `/users/${currentUser._id}/applied/remove`,
-        { jobId }
+        {
+          data: { jobId },
+        }
       );
       if (response.status === 200) {
         setTrigger(!trigger);
@@ -439,9 +442,11 @@ const Profile = () => {
 
   const removeWantToApplyJobs = async (jobId) => {
     try {
-      const response = await _axios.post(
+      const response = await _axios.delete(
         `/users/${currentUser._id}/wanttoapply/remove`,
-        { jobId }
+        {
+          data: { jobId },
+        }
       );
       if (response.status === 200) {
         setTrigger(!trigger);
@@ -1066,11 +1071,11 @@ const Profile = () => {
                                       </InputLabel>
                                       <NativeSelect
                                         defaultValue={
-                                          appliedJobs &&
-                                          appliedJobs.includes(job._id)
+                                          appliedJobsIDs &&
+                                          appliedJobsIDs.includes(job._id)
                                             ? "Applied"
-                                            : wantToApply &&
-                                              wantToApply.includes(job._id)
+                                            : wantToApplyIDs &&
+                                              wantToApplyIDs.includes(job._id)
                                             ? "Want to Apply"
                                             : ""
                                         }

@@ -277,15 +277,17 @@ export const updateSubscribed = async (req, res) => {
 };
 
 export const removeSubscribed = async (req, res) => {
+  
   const userId = req.params.id; // The user's ID
   const subscribed = req.body.subscribed;
-
+  console.log("Inside remove Subscribed: "+ userId+ " index: "+subscribed)
   try {
     const client = new MongoClient(db);
     await client.connect();
 
     const dbname = client.db(dbName);
-
+    const user = await dbname.collection("users").findOne({ _id: new ObjectId(userId) });
+    console.log("User Subscribed Array:", user?.subscribed);
     const result = await dbname
       .collection("users")
       .updateOne(
@@ -298,6 +300,7 @@ export const removeSubscribed = async (req, res) => {
     } else {
       res.status(404).json("User not found"); // User with the given ID not found
     }
+    console.log("MongoDB Update Result:", result);
 
     client.close();
   } catch (err) {

@@ -32,7 +32,8 @@ const Job = () => {
 
   const jobId = location.pathname.split("/")[2];
   const [job, setJob] = useState({});
-
+  const [appliedJobs, setAppliedJobs] = useState([]);
+  const [wantToApply, setWantToApply] = useState([]);
   useEffect(() => {
     // Extract the token from the URL
     const params = new URLSearchParams(location.search);
@@ -49,10 +50,10 @@ const Job = () => {
   }, []);
 
   console.log("Looging TOKEN");
-  useEffect( () => {
+  useEffect(() => {
     if (currentUser) {
       try {
-        const response =  _axios.post(`/activity/`, {
+        const response = _axios.post(`/activity/`, {
           action: "visited",
           userid: currentUser._id,
           jobid: jobId,
@@ -88,6 +89,8 @@ const Job = () => {
       const res = await _axios.get(`users/${currentUser._id}`);
 
       setSavedPosts(res.data.saved_posts);
+      setAppliedJobs(res.data.applied);
+      setWantToApply(res.data.wantToApply);
       console.log(res.data);
     } catch (err) {
       console.log(err);
@@ -100,7 +103,6 @@ const Job = () => {
       // Cleanup code if needed
     };
   }, [jobId, trigger]);
-
 
   const updateSavedJobs = async (jobId) => {
     try {
@@ -170,6 +172,97 @@ const Job = () => {
   };
 
   ////////////////////////
+
+  /////////////////////////////////////////////////
+
+  const handleMarkChange = (event, jobId) => {
+    const selectedValue = event;
+
+    if (selectedValue === "Applied") {
+      updateAppliedJobs(jobId);
+    } else if (selectedValue === "Want to Apply") {
+      updateWantToApplyJobs(jobId);
+    }
+    else if (selectedValue === "Clear") {
+      removeAppliedJobs(jobId);
+      removeWantToApplyJobs(jobId);
+    }
+  };
+
+  /////////////////////////////////////////////////
+  const updateAppliedJobs = async (jobId) => {
+    try {
+      const response = await _axios.post(`/users/${currentUser._id}/applied`, {
+        jobId,
+      });
+      if (response.status === 200) {
+        console.log("Job Marked Applied successfully");
+        removeWantToApplyJobs(jobId);
+      } else {
+        console.log("User not found or error occurred.");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+
+  const removeAppliedJobs = async (jobId) => {
+    try {
+      const response = await _axios.delete(
+        `/users/${currentUser._id}/applied/remove`,
+        {
+          data: { jobId },
+        }
+      );
+      if (response.status === 200) {
+        setTrigger(!trigger);
+        console.log("Job unSaved successfully");
+      } else {
+        console.log("User not found or error occurred.");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+  ///////////////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////////////
+  const updateWantToApplyJobs = async (jobId) => {
+    try {
+      const response = await _axios.post(
+        `/users/${currentUser._id}/wanttoapply`,
+        { jobId }
+      );
+      if (response.status === 200) {
+        removeAppliedJobs(jobId);
+        console.log("Job Marked Applied successfully");
+      } else {
+        console.log("User not found or error occurred.");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+
+  const removeWantToApplyJobs = async (jobId) => {
+    try {
+      const response = await _axios.delete(
+        `/users/${currentUser._id}/wanttoapply/remove`,
+        {
+          data: { jobId },
+        }
+      );
+      if (response.status === 200) {
+        setTrigger(!trigger);
+        console.log("Job unSaved successfully");
+      } else {
+        console.log("User not found or error occurred.");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+  ///////////////////////////////////////////////////////////////
+
   return (
     <div className="w-full bg-slate-100  ">
       <div className="flex items-center h-screen w-4/5 mx-auto">
@@ -279,26 +372,47 @@ const Job = () => {
                 <LocationOnIcon /> {job.location}
               </p>
             </div>
-          </div>
-          <div className="mt-5 border w-fit rounded-md place-content-between border-gray-300 p-3 bg-white">
-            <FormControl className="w-fit border   cursor-pointer">
-              <InputLabel variant="standard" htmlFor="uncontrolled-native">
-                Mark
-              </InputLabel>
-              <NativeSelect
-                defaultValue={30}
-                inputProps={{
-                  name: "mark",
-                  id: "uncontrolled-native",
+          </div><div className="flex flex-row justify-between">
+            {currentUser && (
+              <div
+                className={`mt-5 w-fit border rounded-md place-content-between cursor-pointer border-gray-300 p-3 bg-white ${
+                  appliedJobs && appliedJobs.includes(job._id)
+                    ? "text-white font-semibold cursor-not-allowed bg-blue-600"
+                    : ""
+                }`}
+                onClick={() => {
+                  if (!(appliedJobs && appliedJobs.includes(job._id))) {
+                    handleMarkChange("Applied", job._id);
+                  }
                 }}
-                className=" "
               >
-                <option value=""></option>
-                <option value="Applied">Applied</option>
-                <option value="Want to Apply">Want to Apply</option>
-              </NativeSelect>
-            </FormControl>
-          </div>
+                Applied
+              </div>
+            )}
+
+            {currentUser && (
+              <div
+                className={`mt-5 w-fit border rounded-md place-content-between cursor-pointer border-gray-300 p-3 bg-white ${
+                  wantToApply && wantToApply.includes(job._id)
+                    ? "text-white font-semibold cursor-not-allowed bg-blue-600"
+                    : ""
+                }`}
+                onClick={() => {
+                  if (!(wantToApply && wantToApply.includes(job._id))) {
+                    handleMarkChange("Want to Apply", job._id);
+                  }
+                }}
+              >
+                Want to Apply
+              </div>
+            )}
+
+            <div
+              className="mt-5 w-fit border rounded-md cursor-pointer place-content-between border-gray-300 p-3 bg-white"
+              onClick={() => handleMarkChange("Clear", job._id)}
+            >
+              Clear
+            </div></div>
           <div className="mt-5 border rounded-md place-content-between border-gray-300 p-3 bg-white">
             {job.tags && job.tags.length > 0 ? (
               <>
