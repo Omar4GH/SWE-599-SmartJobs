@@ -438,7 +438,7 @@ const Job = () => {
               href={job.url}
               startDecorator={<OpenInNew />}
             >
-              Open in new tab
+              Apply Now
             </Button>
           </div>
         </div>
