@@ -264,8 +264,8 @@ const Job = () => {
   ///////////////////////////////////////////////////////////////
 
   return (
-    <div className="w-full bg-slate-100  ">
-      <div className="flex items-center h-screen w-4/5 mx-auto">
+    <div className="w-full h-full bg-slate-100  ">
+      <div className="flex items-center  w-4/5 mx-auto">
         <div
           className="w-2/3 p-4 bg-white rounded-lg my-6 shadow-md"
           style={{ overflowY: "auto" }}
@@ -375,7 +375,7 @@ const Job = () => {
           </div><div className="flex flex-row justify-between">
             {currentUser && (
               <div
-                className={`mt-5 w-fit border rounded-md place-content-between cursor-pointer border-gray-300 p-3 bg-white ${
+                className={`mt-5 w-fit border rounded-md place-content-between cursor-pointer border-gray-300 p-3  ${
                   appliedJobs && appliedJobs.includes(job._id)
                     ? "text-white font-semibold cursor-not-allowed bg-blue-600"
                     : ""
@@ -392,7 +392,7 @@ const Job = () => {
 
             {currentUser && (
               <div
-                className={`mt-5 w-fit border rounded-md place-content-between cursor-pointer border-gray-300 p-3 bg-white ${
+                className={`mt-5 w-fit border rounded-md place-content-between cursor-pointer border-gray-300 p-3  ${
                   wantToApply && wantToApply.includes(job._id)
                     ? "text-white font-semibold cursor-not-allowed bg-blue-600"
                     : ""

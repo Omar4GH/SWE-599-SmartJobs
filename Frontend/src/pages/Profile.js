@@ -70,7 +70,7 @@ const Profile = () => {
   }, [savedPostsIds, trigger]);
 
   useEffect(() => {
-    if (currentUser && savedPostsIds && currentUser.type === "Employer") {
+    if (currentUser &&  currentUser.type === "Employer") {
       getUserJobs();
     }
   }, [trigger]);

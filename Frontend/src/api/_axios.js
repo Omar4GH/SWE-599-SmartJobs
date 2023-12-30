@@ -1,9 +1,9 @@
 import axios from "axios";
 
-
+const baseURL = process.env.REACT_APP_BACKEND_URL
 
 let config = {
-  baseURL: "http://localhost:8000/api",
+  baseURL: baseURL,
 };
 
 const _axios = axios.create(config);
