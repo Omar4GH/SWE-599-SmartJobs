@@ -306,8 +306,41 @@ const scheduleSavedJobsEmail = async () => {
   }
 };
 
-const startDelayInMilliseconds = 1 * 10 * 1000;
+const intervalInDays = 2;
+const millisecondsInADay = 24 * 60 * 60 * 1000;
+const intervalInMilliseconds = intervalInDays * millisecondsInADay;
+
+// Define your function to be executed
+const scheduledFunction = () => {
+  console.log('Executing the function at intervals...');
+  // Call your function here
+  scheduleSavedJobsEmail();
+};
+
+// Call the function immediately
+scheduledFunction();
+
+// Schedule the function to run at intervals
+const intervalId = setInterval(scheduledFunction, intervalInMilliseconds);
+
+
+const runScheduledFunction = () => {
+  // Call your function immediately
+  scheduleSavedJobsEmail();
+
+  // Schedule the function to run every two days
+  const intervalInDays = 2;
+  const millisecondsInADay = 24 * 60 * 60 * 1000;
+  setTimeout(runScheduledFunction, intervalInDays * millisecondsInADay);
+};
+
+// Start the process
+runScheduledFunction();
+
+
 /*
+const startDelayInMilliseconds = 1 * 10 * 1000;
+
 // Call the function to schedule the saved jobs email after the specified delay
 setTimeout(() => {
   scheduleSavedJobsEmail();

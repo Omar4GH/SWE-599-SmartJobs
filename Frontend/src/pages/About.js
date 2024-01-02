@@ -1,6 +1,18 @@
 import React, { useContext, useState } from "react";
 import bigLogo from "../assets/SmartJobsLogo.png";
+import report from "./files/report.pdf";
 function About() {
+
+
+  const downloadPDF = () => {
+    const link = document.createElement("a");
+    link.href = report;
+    link.download = "report.pdf";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="relative flex flex-col justify-center items-center h-screen overflow-hidden bg-gray-800">
       <img src={bigLogo} className="h-80 w-auto" />
@@ -21,9 +33,9 @@ function About() {
       <br/> <a className="font-semibold border hover:shadow-xl solid p-2 rounded-xl" href="https://github.com/Omar4GH/SWE-599-SmartJobs">Repo for this Project here</a>
       <br/> 03-January-2024
         <a
+          onClick={downloadPDF}
+          className="font-semibold border p-2 cursor-pointer rounded-xl hover:shadow-xl "
           
-          className="font-semibold border p-2 cursor-not-allowed rounded-xl hover:shadow-xl disabled:opacity-50 disabled:pointer-events-none"
-          disabled
         >
           Download Report
         </a>
