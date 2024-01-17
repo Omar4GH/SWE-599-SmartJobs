@@ -1,3 +1,3 @@
 # Live website
-https://smart-jobs.netlify.app/  --Backend is off.
+https://smart-jobs.netlify.app/ 
 
